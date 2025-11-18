@@ -1,14 +1,16 @@
 ---
 title: "Descriptive Statistical Analysis Template"
-author: "Your Name"
+author: "Tasmia Alamgir"
 date: "`r Sys.Date()`"
 output: 
-  html_document:
+  pdf_document:
     toc: true
-    toc_float: true
     number_sections: true
-    theme: flatly
-    code_folding: show
+    fig_caption: true
+    latex_engine: xelatex
+    keep_tex: false
+geometry: "margin=1in"
+fontsize: 11pt
 ---
 
 ```{r setup, include=FALSE}
@@ -16,9 +18,10 @@ knitr::opts_chunk$set(
   echo = TRUE,
   warning = FALSE,
   message = FALSE,
-  fig.width = 10,
-  fig.height = 6,
-  fig.align = "center"
+  fig.width = 8,
+  fig.height = 5,
+  fig.align = "center",
+  out.width = "80%"
 )
 
 # Load required libraries
@@ -31,8 +34,8 @@ library(car)            # Box-Cox transformation
 library(moments)        # Skewness and kurtosis
 library(gridExtra)      # Arranging plots
 library(ggplot2)        # Advanced plotting
+library(dplyr)          # Data manipulation
 ```
-
 
 # Data Loading and Preparation
 
@@ -54,12 +57,10 @@ cat("Variable names:", names(data), "\n")
 str(data)
 ```
 
-
-
 ```{r data-preview}
 # Preview the data
 kable(head(data, 10), caption = "First 10 rows of the dataset") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"))
+  kable_styling(latex_options = c("striped", "hold_position"))
 ```
 
 # Frequency Tables
@@ -77,7 +78,7 @@ if(ncol(cat_data) > 0) {
     freq_table <- table(cat_data[[var]])
     print(kable(freq_table, col.names = c(var, "Frequency"), 
                 caption = paste("Absolute Frequency Table for", var)) %>%
-          kable_styling(bootstrap_options = c("striped", "hover")))
+          kable_styling(latex_options = c("striped", "hold_position")))
   }
 } else {
   cat("No categorical variables found in the dataset.\n")
@@ -93,7 +94,7 @@ for(var in names(num_data)[1:2]) {  # Show first 2 numerical variables as exampl
   freq_table <- table(cut(num_data[[var]], breaks = breaks, include.lowest = TRUE))
   print(kable(freq_table, col.names = c("Interval", "Frequency"),
               caption = paste("Binned Frequency Table for", var)) %>%
-        kable_styling(bootstrap_options = c("striped", "hover")))
+        kable_styling(latex_options = c("striped", "hold_position")))
 }
 ```
 
@@ -113,7 +114,7 @@ if(ncol(cat_data) > 0) {
     )
     print(kable(rel_freq_df, digits = 4,
                 caption = paste("Relative Frequency Table for", var)) %>%
-          kable_styling(bootstrap_options = c("striped", "hover")))
+          kable_styling(latex_options = c("striped", "hold_position")))
   }
 }
 
@@ -130,7 +131,7 @@ for(var in names(num_data)[1:2]) {
   )
   print(kable(rel_freq_df, digits = 4,
               caption = paste("Relative Frequency Table for", var)) %>%
-        kable_styling(bootstrap_options = c("striped", "hover")))
+        kable_styling(latex_options = c("striped", "hold_position")))
 }
 ```
 
@@ -138,7 +139,7 @@ for(var in names(num_data)[1:2]) {
 
 ## Absolute Frequency Bar Plots
 
-```{r absolute-barplots, fig.height=8}
+```{r absolute-barplots, fig.height=6}
 if(ncol(cat_data) > 0) {
   plots_list <- list()
   for(i in seq_along(names(cat_data))) {
@@ -164,7 +165,7 @@ if(ncol(cat_data) > 0) {
 
 ## Relative Frequency Bar Plots
 
-```{r relative-barplots, fig.height=8}
+```{r relative-barplots, fig.height=6}
 if(ncol(cat_data) > 0) {
   plots_list <- list()
   for(i in seq_along(names(cat_data))) {
@@ -222,8 +223,7 @@ summary_stats <- as.data.frame(summary_stats)
 
 kable(summary_stats, 
       caption = "Comprehensive Summary Statistics for Numerical Variables") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>%
-  scroll_box(width = "100%")
+  kable_styling(latex_options = c("striped", "hold_position", "scale_down"))
 ```
 
 ```{r basic-summary}
@@ -231,15 +231,14 @@ kable(summary_stats,
 describe_stats <- describe(num_data)
 kable(describe_stats, digits = 4,
       caption = "Descriptive Statistics (psych package)") %>%
-  kable_styling(bootstrap_options = c("striped", "hover")) %>%
-  scroll_box(width = "100%")
+  kable_styling(latex_options = c("striped", "hold_position", "scale_down"))
 ```
 
 # Box Plots
 
 ## Side-by-Side Box Plots
 
-```{r side-by-side-boxplots, fig.height=10}
+```{r side-by-side-boxplots, fig.height=7}
 # Box plots for numerical variables
 if(ncol(num_data) > 0) {
   # Overall box plots
@@ -284,7 +283,7 @@ if(ncol(num_data) > 1) {
   # Display correlation matrix as table
   kable(cor_matrix, digits = 3,
         caption = "Correlation Matrix") %>%
-    kable_styling(bootstrap_options = c("striped", "hover"))
+    kable_styling(latex_options = c("striped", "hold_position"))
   
   # Visual correlation matrix
   corrplot(cor_matrix, method = "color", type = "upper", 
@@ -293,9 +292,48 @@ if(ncol(num_data) > 1) {
 }
 ```
 
+## Scatter Plots
+
+```{r scatterplots, fig.height=9}
+# if(ncol(num_data) > 1) {
+#   # Create scatter plot matrix
+#   pairs(num_data, 
+#         main = "Scatter Plot Matrix",
+#         pch = 19, 
+#         col = alpha("steelblue", 0.6))
+#   
+#   # Individual scatter plots for first few variable pairs
+#   var_names <- names(num_data)[1:min(4, ncol(num_data))]
+#   plots_list <- list()
+#   plot_count <- 1
+#   
+#   for(i in 1:(length(var_names)-1)) {
+#     for(j in (i+1):length(var_names)) {
+#       if(plot_count <= 6) {  # Limit to 6 plots
+#         cor_val <- cor(num_data[[var_names[i]]], num_data[[var_names[j]]], use = "complete.obs")
+#         
+#         p <- ggplot(data, aes_string(x = var_names[i], y = var_names[j])) +
+#           geom_point(alpha = 0.6, color = "steelblue") +
+#           geom_smooth(method = "lm", se = TRUE, color = "red") +
+#           labs(title = paste(var_names[i], "vs", var_names[j], 
+#                            "\nCorrelation:", round(cor_val, 3))) +
+#           theme_minimal()
+#         
+#         plots_list[[plot_count]] <- p
+#         plot_count <- plot_count + 1
+#       }
+#     }
+#   }
+#   
+#   if(length(plots_list) > 0) {
+#     do.call(grid.arrange, c(plots_list, ncol = 2))
+#   }
+# }
+```
+
 # Histograms
 
-```{r histograms, fig.height=12}
+```{r histograms, fig.height=9}
 if(ncol(num_data) > 0) {
   plots_list <- list()
   
@@ -339,7 +377,7 @@ if(ncol(num_data) > 0) {
 
 ## Q-Q Plots (Normal Quantile Plots)
 
-```{r qq-plots, fig.height=12}
+```{r qq-plots, fig.height=9}
 if(ncol(num_data) > 0) {
   plots_list <- list()
   
@@ -358,6 +396,23 @@ if(ncol(num_data) > 0) {
   
   do.call(grid.arrange, c(plots_list, ncol = 2))
 }
+```
+
+## Quantile-Quantile Plots Between Variables
+
+```{r qq-between-vars, fig.height=6}
+# if(ncol(num_data) > 1) {
+#   # Example: Compare first two numerical variables
+#   var1 <- names(num_data)[1]
+#   var2 <- names(num_data)[2]
+#   
+#   ggplot(data, aes_string(x = var1, y = var2)) +
+#     geom_qq() +
+#     geom_abline(slope = 1, intercept = 0, color = "red") +
+#     labs(title = paste("Quantile-Quantile Plot:", var1, "vs", var2),
+#          subtitle = "Red line shows y=x reference") +
+#     theme_minimal()
+# }
 ```
 
 # Box-Cox Transformations
@@ -390,11 +445,11 @@ if(ncol(num_data) > 0) {
   
   kable(normality_results, 
         caption = "Normality Test Results (Shapiro-Wilk Test)") %>%
-    kable_styling(bootstrap_options = c("striped", "hover"))
+    kable_styling(latex_options = c("striped", "hold_position"))
 }
 ```
 
-```{r box-cox-transformations, fig.height=15}
+```{r box-cox-transformations, fig.height=11}
 # Apply Box-Cox transformation to non-normal variables
 if(ncol(num_data) > 0) {
   non_normal_vars <- normality_results$Variable[normality_results$Normal == "No (p ≤ 0.05)"]
@@ -467,7 +522,7 @@ if(ncol(num_data) > 0) {
     if(nrow(transformation_summary) > 0) {
       kable(transformation_summary, 
             caption = "Box-Cox Transformation Parameters") %>%
-        kable_styling(bootstrap_options = c("striped", "hover"))
+        kable_styling(latex_options = c("striped", "hold_position"))
     }
     
   } else {
@@ -500,3 +555,7 @@ cat("- Mention any outliers or unusual observations\n")
 cat("- Discuss correlations between variables\n")
 cat("- Summarize transformation results if applicable\n")
 ```
+
+---
+
+**Note**: This template provides a comprehensive framework for descriptive statistical analysis. Modify the data loading section and adjust the analyses based on your specific dataset and research questions. Remember to interpret the results in the context of your study domain.
