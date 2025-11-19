@@ -1,0 +1,78 @@
+---
+title: "DSCC/CSC/TCS 462 Project"
+output:
+  pdf_document: 
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+fontsize: 12pt
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = T, eval=T,tidy=TRUE, tidy.opts=list(width.cutoff=60))
+```
+
+```{r, echo=T}   
+# Data Preprocessing
+
+library(dplyr)
+library(lubridate)
+df <- read.csv("/Users/tasinkhan/Downloads/EV_Charging_Data-_Municipal_Lots_and_Garages_20251106.csv", stringsAsFactors = FALSE, check.names = FALSE)
+
+# Choose ID_tag as unique identifier
+
+# Check if ID_tag is unique
+sum(duplicated(df$`ID Tag`))
+# Keep only the first row per ID_tag
+df <- df %>%
+  distinct(`ID Tag`, .keep_all = TRUE)
+
+# Remove columns: Driver_id, Invalidity_reason, country
+df <- df %>%
+  select(-`Driver ID`, -`Invalidity Reason`, -`Country`)
+
+# Sort the data based on date
+df$Date <- as.Date(df$Date, format = "%m/%d/%Y")
+df <- df %>%
+  arrange(Date)
+
+# Remove rows where session_status is “Disconnected”
+df <- df %>%
+  filter(`Session Status` != "Disconnected")
+ 
+ # Keep Station_name and drop Charger_id
+df <- df %>%
+  select(-`Charge Box ID`)
+ 
+# Check null values and drop rows with any NA
+colSums(is.na(df))
+df <- df %>%
+  tidyr::drop_na()
+
+# Add weekday column
+df <- df %>%
+  mutate(weekday = weekdays(Date))
+
+# Add holidays column for year 2024
+# Need to work on this!!
+holidays_2024 <- as.Date(c(
+  "2024-01-01", # New Year's Day
+  "2024-01-15", # MLK Day
+  "2024-02-19", # Presidents' Day
+  "2024-05-27", # Memorial Day
+  "2024-06-19", # Juneteenth
+  "2024-07-04", # Independence Day
+  "2024-09-02", # Labor Day
+  "2024-10-14", # Columbus/Indigenous Peoples' Day
+  "2024-11-11", # Veterans Day
+  "2024-11-28", # Thanksgiving
+  "2024-12-25"  # Christmas
+))
+
+df <- df %>%
+  mutate(
+    is_holiday_2024 = Date %in% holidays_2024
+  )
+
+ head(df, 10)
+
+``` 
