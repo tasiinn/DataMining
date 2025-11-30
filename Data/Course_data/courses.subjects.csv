@@ -1,0 +1,261 @@
+_id,name,code,semester,year
+67f2f754bb9244400ab2b012,Biochem and Molecular Biology,BMB,Spring,2025
+67f2f754bb9244400ab2b013,Biology,BIL,Spring,2025
+67f2f754bb9244400ab2b02a,Dermatology & Cutaneous Surger,DER,Spring,2025
+67f2f754bb9244400ab2b03a,German,GER,Spring,2025
+67f2f754bb9244400ab2b04b,International Studies,INS,Spring,2025
+67f2f754bb9244400ab2b04c,Italian,ITA,Spring,2025
+67f2f754bb9244400ab2b04d,Japanese,JPN,Spring,2025
+67f2f754bb9244400ab2b05f,Meteorology/Phys Oceanography,MPO,Spring,2025
+67f2f754bb9244400ab2b068,Music Industry,MIN,Spring,2025
+67f2f754bb9244400ab2b06a,Musicology,MCY,Spring,2025
+67f2f754bb9244400ab2b063,Modern Language and Literature,MLL,Spring,2025
+67f2f754bb9244400ab2b064,Molecular Cell and Dev Biology,MDB,Spring,2025
+67f2f754bb9244400ab2b07d,Spanish,SPA,Spring,2025
+67f2f754bb9244400ab2b083,Theory and Composition,MTC,Spring,2025
+67f2f754bb9244400ab2b031,Epidemiology/Public Health,EPH,Spring,2025
+67f2f754bb9244400ab2b057,Marine Biology and Ecology,MBE,Spring,2025
+67f2f754bb9244400ab2b077,Public Health,BPH,Spring,2025
+67f2f754bb9244400ab2b085,University of Miami Experience,UMX,Spring,2025
+67f2f754bb9244400ab2b01a,Cancer Biology,CAB,Spring,2025
+67f2f754bb9244400ab2b01c,Chemistry,CHM,Spring,2025
+67f2f754bb9244400ab2b034,French,FRE,Spring,2025
+67f2f754bb9244400ab2b04a,Interactive Media,CIM,Spring,2025
+67f2f754bb9244400ab2b059,Marine Science,MSC,Spring,2025
+67f2f754bb9244400ab2b05a,Marketing,MKT,Spring,2025
+67f2f754bb9244400ab2b05c,Mathematics,MTH,Spring,2025
+67f2f754bb9244400ab2b066,Music Education,MED,Spring,2025
+67f2f754bb9244400ab2b007,Accounting Bus Admin,ACC,Spring,2025
+67f2f754bb9244400ab2b023,Communication Studies,COS,Spring,2025
+67f2f754bb9244400ab2b02f,English,ENG,Spring,2025
+67f2f754bb9244400ab2b036,General Engineering,EGN,Spring,2025
+67f2f754bb9244400ab2b037,Genomic Medicine,GNM,Spring,2025
+67f2f754bb9244400ab2b054,MAIA Program,IGS,Spring,2025
+67f2f754bb9244400ab2b055,Management,MGT,Spring,2025
+67f2f754bb9244400ab2b060,Microbiology/Immunology,MIC,Spring,2025
+67f2f754bb9244400ab2b070,Physical Therapy,PTS,Spring,2025
+67f2f754bb9244400ab2b008,Aerospace Studies,AIS,Spring,2025
+67f2f754bb9244400ab2b016,Biostatistics,BST,Spring,2025
+67f2f754bb9244400ab2b033,First Year Directions,FYD,Spring,2025
+67f2f754bb9244400ab2b038,Geography & Sustainable Dev,GEG,Spring,2025
+67f2f754bb9244400ab2b03b,Global Health Studies,GHS,Spring,2025
+67f2f754bb9244400ab2b04f,Judaic Studies,JUS,Spring,2025
+67f2f754bb9244400ab2b051,Kinesiology,KIN,Spring,2025
+67f2f754bb9244400ab2b069,Music Therapy,MTY,Spring,2025
+67f2f754bb9244400ab2b06f,Philosophy,PHI,Spring,2025
+67f2f754bb9244400ab2b074,Portuguese,POR,Spring,2025
+67f2f754bb9244400ab2b07c,Sociology and Criminology,SOC,Spring,2025
+67f2f754bb9244400ab2b087,Vocal Performance,MVP,Spring,2025
+67f2f754bb9244400ab2b00a,American Studies,AMS,Spring,2025
+67f2f754bb9244400ab2b00b,Anthropology,APY,Spring,2025
+67f2f754bb9244400ab2b00d,Architecture,ARC,Spring,2025
+67f2f754bb9244400ab2b01d,Chinese,CHI,Spring,2025
+67f2f754bb9244400ab2b02c,Ecosystem Science and Policy,ECS,Spring,2025
+67f2f754bb9244400ab2b035,Gender and Sexuality Studies,GSS,Spring,2025
+67f2f754bb9244400ab2b03d,Haitian Creole,HAI,Spring,2025
+67f2f754bb9244400ab2b048,Instrumental Performance,MIP,Spring,2025
+67f2f754bb9244400ab2b05b,Master of Arts Liberal Studies,MLS,Spring,2025
+67f2f754bb9244400ab2b067,Music Engineering,MUE,Spring,2025
+67f2f754bb9244400ab2b06d,Ocean Sciences,OCE,Spring,2025
+67f2f754bb9244400ab2b075,Program Biomedical Sciences,PIB,Spring,2025
+67f2f754bb9244400ab2b07e,Strategic Communication,STC,Spring,2025
+67f2f754bb9244400ab2b080,Study Abroad Program,SAP,Spring,2025
+67f2f754bb9244400ab2b082,Theatre Arts,THA,Spring,2025
+67f2f754bb9244400ab2b00e,Art,ART,Spring,2025
+67f2f754bb9244400ab2b022,Communication,COM,Spring,2025
+67f2f754bb9244400ab2b032,Finance Bus Admin,FIN,Spring,2025
+67f2f754bb9244400ab2b043,Human Genetics and Genomics,HGG,Spring,2025
+67f2f754bb9244400ab2b044,Independnt Learning Initiative,IND,Spring,2025
+67f2f754bb9244400ab2b024,Computer Science,CSC,Spring,2025
+67f2f754bb9244400ab2b026,Cuban Studies,CUB,Spring,2025
+67f2f754bb9244400ab2b05e,Media Scoring and Production,MSP,Spring,2025
+67f2f754bb9244400ab2b061,Military Science,MSL,Spring,2025
+67f2f754bb9244400ab2b062,Modern Artist Dev Entreprenshp,MDE,Spring,2025
+67f2f754bb9244400ab2b076,Psychology,PSY,Spring,2025
+67f2f754bb9244400ab2b07b,Religious Studies,REL,Spring,2025
+67f2f754bb9244400ab2b088,Writing Studies,WRS,Spring,2025
+67f2f754bb9244400ab2b00c,Arabic,ARB,Spring,2025
+67f2f754bb9244400ab2b019,Business Technology,BTE,Spring,2025
+67f2f754bb9244400ab2b01b,Chemical Environ Material Engr,CET,Spring,2025
+67f2f754bb9244400ab2b020,Classics,CLA,Spring,2025
+67f2f754bb9244400ab2b028,Data Science,DSC,Spring,2025
+67f2f754bb9244400ab2b03e,Health Management and Policy,HMP,Spring,2025
+67f2f754bb9244400ab2b047,"Innovation, Technology&Design",ITD,Spring,2025
+67f2f754bb9244400ab2b06e,Ophthalmolgy,OPH,Spring,2025
+67f2f754bb9244400ab2b071,Physics,PHY,Spring,2025
+67f2f754bb9244400ab2b079,Radiation Oncology,RON,Spring,2025
+67f2f754bb9244400ab2b014,Biomedical Engineering,BME,Spring,2025
+67f2f754bb9244400ab2b015,Biomedical Sciences,MBS,Spring,2025
+67f2f754bb9244400ab2b017,Business,BUS,Spring,2025
+67f2f754bb9244400ab2b027,Dance,DAN,Spring,2025
+67f2f754bb9244400ab2b040,Hebrew,HEB,Spring,2025
+67f2f754bb9244400ab2b042,Honors and Acad Enhancement,HON,Spring,2025
+67f2f754bb9244400ab2b049,Intensive English Program,IEP,Spring,2025
+67f2f754bb9244400ab2b072,Physiology/Biophysics,PHS,Spring,2025
+67f2f754bb9244400ab2b030,Environmental Science & Policy,EVR,Spring,2025
+67f2f754bb9244400ab2b03c,Greek,GRE,Spring,2025
+67f2f754bb9244400ab2b078,RSMAS General,RSM,Spring,2025
+67f2f754bb9244400ab2b086,Urban Studies,URB,Spring,2025
+67f2f754bb9244400ab2b00f,Art History,ARH,Spring,2025
+67f2f754bb9244400ab2b011,Atmospheric Science,ATM,Spring,2025
+67f2f754bb9244400ab2b018,Business Law,BSL,Spring,2025
+67f2f754bb9244400ab2b021,Clinical and Translational Inv,CTI,Spring,2025
+67f2f754bb9244400ab2b02e,Electrical & Computer Engineer,ECE,Spring,2025
+67f2f754bb9244400ab2b039,Geological Sciences,GSC,Spring,2025
+67f2f754bb9244400ab2b04e,Journalism & Media Management,JMM,Spring,2025
+67f2f754bb9244400ab2b053,Latin American Studies,LAS,Spring,2025
+67f2f754bb9244400ab2b056,Management Science,MAS,Spring,2025
+67f2f754bb9244400ab2b07f,Studio Music and Jazz,MSJ,Spring,2025
+67f2f754bb9244400ab2b081,Teaching and Learning,TAL,Spring,2025
+67f2f754bb9244400ab2b084,University Internship,UMI,Spring,2025
+67f2f754bb9244400ab2b010,Arts and Sciences General,ASG,Spring,2025
+67f2f754bb9244400ab2b01e,Cinematic Arts,CCA,Spring,2025
+67f2f754bb9244400ab2b01f,Civil & Architectural Engineer,CAE,Spring,2025
+67f2f754bb9244400ab2b025,Construction Management,CMA,Spring,2025
+67f2f754bb9244400ab2b029,Department of Music Studies,MUS,Spring,2025
+67f2f754bb9244400ab2b02d,Education and Psych Study,EPS,Spring,2025
+67f2f754bb9244400ab2b041,History,HIS,Spring,2025
+67f2f754bb9244400ab2b06b,Neuroscience Program,NEU,Spring,2025
+67f2f754bb9244400ab2b073,Political Science,POL,Spring,2025
+67f2f754bb9244400ab2b009,Africana Studies,AAS,Spring,2025
+67f2f754bb9244400ab2b02b,Economics,ECO,Spring,2025
+67f2f754bb9244400ab2b045,Industrial & Systems Engineer,ISE,Spring,2025
+67f2f754bb9244400ab2b058,Marine Geosciences,MGS,Spring,2025
+67f2f754bb9244400ab2b05d,Mech and Aero Engineering,MAE,Spring,2025
+67f2f754bb9244400ab2b065,Molecular/Cellular Pharmacolgy,MCP,Spring,2025
+67f2f754bb9244400ab2b06c,Nursing,NUR,Spring,2025
+67f2f754bb9244400ab2b07a,Real Estate Development,RED,Spring,2025
+67f2f754bb9244400ab2b03f,Healthcare Sciences,HCS,Spring,2025
+67f2f754bb9244400ab2b046,Innovation,Technology&Design,Spring,2025
+67f2f754bb9244400ab2b050,Keyboard Performance,MKP,Spring,2025
+67f2f754bb9244400ab2b052,Latin,LAT,Spring,2025
+67fc963e13ef2b6ddd3be7e7,Accounting Bus Admin,ACC,Fall,2025
+67fc963e13ef2b6ddd3be7ed,Architecture,ARC,Fall,2025
+67fc963e13ef2b6ddd3be7eb,Anthropology,APY,Fall,2025
+67fc963e13ef2b6ddd3be7e8,Aerospace Studies,AIS,Fall,2025
+67fc963e13ef2b6ddd3be7ee,Art,ART,Fall,2025
+67fc963e13ef2b6ddd3be7e9,Africana Studies,AAS,Fall,2025
+67fc963e13ef2b6ddd3be7ea,American Studies,AMS,Fall,2025
+67fc963e13ef2b6ddd3be7ec,Arabic,ARB,Fall,2025
+67fc963e13ef2b6ddd3be7f4,Biomedical Engineering,BME,Fall,2025
+67fc963e13ef2b6ddd3be7fa,Cancer Biology,CAB,Fall,2025
+67fc963e13ef2b6ddd3be80a,Dermatology & Cutaneous Surger,DER,Fall,2025
+67fc963e13ef2b6ddd3be7f2,Biochem and Molecular Biology,BMB,Fall,2025
+67fc963e13ef2b6ddd3be806,Cuban Studies,CUB,Fall,2025
+67fc963e13ef2b6ddd3be809,Department of Music Studies,MUS,Fall,2025
+67fc963e13ef2b6ddd3be7fe,Cinematic Arts,CCA,Fall,2025
+67fc963e13ef2b6ddd3be7f7,Business,BUS,Fall,2025
+67fc963e13ef2b6ddd3be805,Construction Management,CMA,Fall,2025
+67fc963e13ef2b6ddd3be807,Dance,DAN,Fall,2025
+67fc963e13ef2b6ddd3be7f1,Atmospheric Science,ATM,Fall,2025
+67fc963e13ef2b6ddd3be7ff,Civil & Architectural Engineer,CAE,Fall,2025
+67fc963e13ef2b6ddd3be803,Communication Studies,COS,Fall,2025
+67fc963e13ef2b6ddd3be7f6,Biostatistics,BST,Fall,2025
+67fc963e13ef2b6ddd3be7fd,Chinese,CHI,Fall,2025
+67fc963e13ef2b6ddd3be7fc,Chemistry,CHM,Fall,2025
+67fc963e13ef2b6ddd3be7f3,Biology,BIL,Fall,2025
+67fc963e13ef2b6ddd3be800,Classics,CLA,Fall,2025
+67fc963e13ef2b6ddd3be7f9,Business Technology,BTE,Fall,2025
+67fc963e13ef2b6ddd3be7f0,Arts and Sciences General,ASG,Fall,2025
+67fc963e13ef2b6ddd3be7ef,Art History,ARH,Fall,2025
+67fc963e13ef2b6ddd3be7f8,Business Law,BSL,Fall,2025
+67fc963e13ef2b6ddd3be7fb,Chemical Environ Material Engr,CET,Fall,2025
+67fc963e13ef2b6ddd3be801,Clinical and Translational Inv,CTI,Fall,2025
+67fc963e13ef2b6ddd3be802,Communication,COM,Fall,2025
+67fc963e13ef2b6ddd3be804,Computer Science,CSC,Fall,2025
+67fc963e13ef2b6ddd3be7f5,Biomedical Sciences,MBS,Fall,2025
+67fc963e13ef2b6ddd3be808,Data Science,DSC,Fall,2025
+67fc963e13ef2b6ddd3be812,Finance Bus Admin,FIN,Fall,2025
+67fc963e13ef2b6ddd3be864,University Internship,UMI,Fall,2025
+67fc963e13ef2b6ddd3be80b,Economics,ECO,Fall,2025
+67fc963e13ef2b6ddd3be816,Gender and Sexuality Studies,GSS,Fall,2025
+67fc963e13ef2b6ddd3be822,History,HIS,Fall,2025
+67fc963e13ef2b6ddd3be82c,Japanese,JPN,Fall,2025
+67fc963e13ef2b6ddd3be837,Marine Geosciences,MGS,Fall,2025
+67fc963e13ef2b6ddd3be83c,Mech and Aero Engineering,MAE,Fall,2025
+67fc963e13ef2b6ddd3be847,Music Industry,MIN,Fall,2025
+67fc963e13ef2b6ddd3be860,Study Abroad Program,SAP,Fall,2025
+67fc963e13ef2b6ddd3be80f,English,ENG,Fall,2025
+67fc963e13ef2b6ddd3be81d,Greek,GRE,Fall,2025
+67fc963e13ef2b6ddd3be836,Marine Biology and Ecology,MBE,Fall,2025
+67fc963e13ef2b6ddd3be846,Music Engineering,MUE,Fall,2025
+67fc963e13ef2b6ddd3be80d,Education and Psych Study,EPS,Fall,2025
+67fc963e13ef2b6ddd3be81f,Health Management and Policy,HMP,Fall,2025
+67fc963e13ef2b6ddd3be826,"Innovation, Technology&Design",ITD,Fall,2025
+67fc963e13ef2b6ddd3be832,Latin American Studies,LAS,Fall,2025
+67fc963e13ef2b6ddd3be83a,Master of Arts Liberal Studies,MLS,Fall,2025
+67fc963e13ef2b6ddd3be845,Music Education,MED,Fall,2025
+67fc963e13ef2b6ddd3be84b,Nursing,NUR,Fall,2025
+67fc963e13ef2b6ddd3be85e,Strategic Communication,STC,Fall,2025
+67fc963e13ef2b6ddd3be85f,Studio Music and Jazz,MSJ,Fall,2025
+67fc963e13ef2b6ddd3be824,Independnt Learning Initiative,IND,Fall,2025
+67fc963e13ef2b6ddd3be828,Intensive English Program,IEP,Fall,2025
+67fc963e13ef2b6ddd3be829,Interactive Media,CIM,Fall,2025
+67fc963e13ef2b6ddd3be82a,International Studies,INS,Fall,2025
+67fc963e13ef2b6ddd3be82b,Italian,ITA,Fall,2025
+67fc963e13ef2b6ddd3be841,Modern Artist Dev Entreprenshp,MDE,Fall,2025
+67fc963e13ef2b6ddd3be842,Modern Language and Literature,MLL,Fall,2025
+67fc963e13ef2b6ddd3be844,Molecular/Cellular Pharmacolgy,MCP,Fall,2025
+67fc963e13ef2b6ddd3be866,Urban Studies,URB,Fall,2025
+67fc963e13ef2b6ddd3be810,Environmental Science & Policy,EVR,Fall,2025
+67fc963e13ef2b6ddd3be811,Epidemiology/Public Health,EPH,Fall,2025
+67fc963e13ef2b6ddd3be817,General Engineering,EGN,Fall,2025
+67fc963e13ef2b6ddd3be81b,German,GER,Fall,2025
+67fc963e13ef2b6ddd3be82f,Keyboard Performance,MKP,Fall,2025
+67fc963e13ef2b6ddd3be834,Management,MGT,Fall,2025
+67fc963e13ef2b6ddd3be80e,Electrical & Computer Engineer,ECE,Fall,2025
+67fc963e13ef2b6ddd3be821,Hebrew,HEB,Fall,2025
+67fc963e13ef2b6ddd3be839,Marketing,MKT,Fall,2025
+67fc963e13ef2b6ddd3be84c,Ocean Sciences,OCE,Fall,2025
+67fc963e13ef2b6ddd3be859,Radiation Oncology,RON,Fall,2025
+67fc963e13ef2b6ddd3be85b,Religious Studies,REL,Fall,2025
+67fc963e13ef2b6ddd3be831,Latin,LAT,Fall,2025
+67fc963e13ef2b6ddd3be83d,Media Scoring and Production,MSP,Fall,2025
+67fc963e13ef2b6ddd3be83e,Meteorology/Phys Oceanography,MPO,Fall,2025
+67fc963e13ef2b6ddd3be840,Military Science,MSL,Fall,2025
+67fc963e13ef2b6ddd3be848,Music Therapy,MTY,Fall,2025
+67fc963e13ef2b6ddd3be849,Musicology,MCY,Fall,2025
+67fc963e13ef2b6ddd3be858,RSMAS General,RSM,Fall,2025
+67fc963e13ef2b6ddd3be865,University of Miami Experience,UMX,Fall,2025
+67fc963e13ef2b6ddd3be80c,Ecosystem Science and Policy,ECS,Fall,2025
+67fc963e13ef2b6ddd3be81c,Global Health Studies,GHS,Fall,2025
+67fc963e13ef2b6ddd3be82d,Journalism & Media Management,JMM,Fall,2025
+67fc963e13ef2b6ddd3be84d,Ophthalmolgy,OPH,Fall,2025
+67fc963e13ef2b6ddd3be850,Physical Therapy,PTS,Fall,2025
+67fc963e13ef2b6ddd3be868,Writing Studies,WRS,Fall,2025
+67fc963e13ef2b6ddd3be835,Management Science,MAS,Fall,2025
+67fc963e13ef2b6ddd3be851,Physics,PHY,Fall,2025
+67fc963e13ef2b6ddd3be815,Freshman Seminars Social Scien,FSS,Fall,2025
+67fc963e13ef2b6ddd3be819,Geography & Sustainable Dev,GEG,Fall,2025
+67fc963e13ef2b6ddd3be825,Industrial & Systems Engineer,ISE,Fall,2025
+67fc963e13ef2b6ddd3be83b,Mathematics,MTH,Fall,2025
+67fc963e13ef2b6ddd3be83f,Microbiology/Immunology,MIC,Fall,2025
+67fc963e13ef2b6ddd3be81a,Geological Sciences,GSC,Fall,2025
+67fc963e13ef2b6ddd3be81e,Haitian Creole,HAI,Fall,2025
+67fc963e13ef2b6ddd3be820,Healthcare Sciences,HCS,Fall,2025
+67fc963e13ef2b6ddd3be830,Kinesiology,KIN,Fall,2025
+67fc963e13ef2b6ddd3be833,MAIA Program,IGS,Fall,2025
+67fc963e13ef2b6ddd3be843,Molecular Cell and Dev Biology,MDB,Fall,2025
+67fc963e13ef2b6ddd3be84e,Philosophy,PHI,Fall,2025
+67fc963e13ef2b6ddd3be855,Program Biomedical Sciences,PIB,Fall,2025
+67fc963e13ef2b6ddd3be818,Genomic Medicine,GNM,Fall,2025
+67fc963e13ef2b6ddd3be823,Human Genetics and Genomics,HGG,Fall,2025
+67fc963e13ef2b6ddd3be854,Portuguese,POR,Fall,2025
+67fc963e13ef2b6ddd3be856,Psychology,PSY,Fall,2025
+67fc963e13ef2b6ddd3be862,Theatre Arts,THA,Fall,2025
+67fc963e13ef2b6ddd3be863,Theory and Composition,MTC,Fall,2025
+67fc963e13ef2b6ddd3be813,First Year Directions,FYD,Fall,2025
+67fc963e13ef2b6ddd3be814,French,FRE,Fall,2025
+67fc963e13ef2b6ddd3be827,Instrumental Performance,MIP,Fall,2025
+67fc963e13ef2b6ddd3be82e,Judaic Studies,JUS,Fall,2025
+67fc963e13ef2b6ddd3be838,Marine Science,MSC,Fall,2025
+67fc963e13ef2b6ddd3be852,Physiology/Biophysics,PHS,Fall,2025
+67fc963e13ef2b6ddd3be853,Political Science,POL,Fall,2025
+67fc963e13ef2b6ddd3be861,Teaching and Learning,TAL,Fall,2025
+67fc963e13ef2b6ddd3be867,Vocal Performance,MVP,Fall,2025
+67fc963e13ef2b6ddd3be84a,Neuroscience Program,NEU,Fall,2025
+67fc963e13ef2b6ddd3be84f,Physical Science,PSC,Fall,2025
+67fc963e13ef2b6ddd3be857,Public Health,BPH,Fall,2025
+67fc963e13ef2b6ddd3be85a,Real Estate Development,RED,Fall,2025
+67fc963e13ef2b6ddd3be85c,Sociology and Criminology,SOC,Fall,2025
+67fc963e13ef2b6ddd3be85d,Spanish,SPA,Fall,2025
