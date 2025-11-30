@@ -1,3 +1,3 @@
-# Project Data Mining and Statistics
+# Project for Statistical Analysis
 
-Project repo for both data mining and computational statistics course.
+Project repo for computational statistics course.
