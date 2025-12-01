@@ -1,0 +1,1434 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+\documentclass[
+  12pt,
+]{article}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\setcounter{secnumdepth}{5}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{graphicx}
+\makeatletter
+\newsavebox\pandoc@box
+\newcommand*\pandocbounded[1]{% scales image to fit in text height/width
+  \sbox\pandoc@box{#1}%
+  \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+  \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
+  \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
+  \ifdim\@tempa\p@<\p@\scalebox{\@tempa}{\usebox\pandoc@box}%
+  \else\usebox{\pandoc@box}%
+  \fi%
+}
+% Set default figure placement to htbp
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{array}
+\usepackage{multirow}
+\usepackage{wrapfig}
+\usepackage{float}
+\usepackage{colortbl}
+\usepackage{pdflscape}
+\usepackage{tabu}
+\usepackage{threeparttable}
+\usepackage{threeparttablex}
+\usepackage[normalem]{ulem}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{bookmark}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  pdftitle={DSCC/CSC/TCS 462 Project},
+  pdfauthor={Group 3},
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\title{DSCC/CSC/TCS 462 Project}
+\author{Group 3}
+\date{2025-11-30}
+
+\begin{document}
+\maketitle
+
+{
+\setcounter{tocdepth}{2}
+\tableofcontents
+}
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Install and load required packages}
+\NormalTok{packages }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}
+  \StringTok{"tidyverse"}\NormalTok{, }\StringTok{"knitr"}\NormalTok{, }\StringTok{"kableExtra"}\NormalTok{, }\StringTok{"corrplot"}\NormalTok{, }\StringTok{"psych"}\NormalTok{, }\StringTok{"car"}\NormalTok{,}
+  \StringTok{"moments"}\NormalTok{, }\StringTok{"gridExtra"}\NormalTok{, }\StringTok{"ggplot2"}\NormalTok{, }\StringTok{"dplyr"}\NormalTok{, }\StringTok{"lubridate"}
+\NormalTok{)}
+\NormalTok{to\_install }\OtherTok{\textless{}{-}}\NormalTok{ packages[}\SpecialCharTok{!}\NormalTok{(packages }\SpecialCharTok{\%in\%} \FunctionTok{installed.packages}\NormalTok{()[, }\StringTok{"Package"}\NormalTok{])]}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(to\_install) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+  \FunctionTok{install.packages}\NormalTok{(to\_install)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\#Data Pre-processing:
+
+In this step, we want to:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\tightlist
+\item
+  Read the data
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}} \FunctionTok{read.csv}\NormalTok{(}\StringTok{"Data/EV\_Charging/EV\_Charging\_Data{-}\_Municipal\_Lots\_and\_Garages\_20251106.csv"}\NormalTok{,}
+    \AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{, }\AttributeTok{check.names =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{1}
+\tightlist
+\item
+  Choose ID tag as an unique identifier:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Choose ID\_tag as unique identifier Check if ID\_tag is}
+\CommentTok{\# unique}
+\FunctionTok{sum}\NormalTok{(}\FunctionTok{duplicated}\NormalTok{(ev\_data}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{ID Tag}\StringTok{\textasciigrave{}}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 176776
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Keep only the first row per ID\_tag}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{distinct}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{ID Tag}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{.keep\_all =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{2}
+\tightlist
+\item
+  Remove Columns and rows that are not relevent to our experiment:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Remove columns: Driver\_id, Invalidity\_reason, country}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\StringTok{\textasciigrave{}}\AttributeTok{Driver ID}\StringTok{\textasciigrave{}}\NormalTok{, }\SpecialCharTok{{-}}\StringTok{\textasciigrave{}}\AttributeTok{Invalidity Reason}\StringTok{\textasciigrave{}}\NormalTok{, }\SpecialCharTok{{-}}\NormalTok{Country)}
+
+\CommentTok{\# Remove rows where session\_status is “Disconnected”}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{filter}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Session Status}\StringTok{\textasciigrave{}} \SpecialCharTok{!=} \StringTok{"DISCONNECTED"}\NormalTok{)}
+
+\CommentTok{\# Keep Station\_name and drop Charger\_id}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{select}\NormalTok{(}\SpecialCharTok{{-}}\StringTok{\textasciigrave{}}\AttributeTok{Charge Box ID}\StringTok{\textasciigrave{}}\NormalTok{)}
+
+\CommentTok{\# Check null values and drop rows with any NA}
+\FunctionTok{colSums}\NormalTok{(}\FunctionTok{is.na}\NormalTok{(ev\_data))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                     Date             Station Name            Location Name 
+##                        0                        0                        0 
+##             Connector ID                   ID Tag           Connected Time 
+##                        0                        0                        0 
+##        Disconnected Time    Charge Duration (min) Connected Duration (min) 
+##                        0                        0                        0 
+##    Energy Provided (kWh)           Session Status 
+##                        0                        0
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+\NormalTok{    tidyr}\SpecialCharTok{::}\FunctionTok{drop\_na}\NormalTok{()}
+\end{Highlighting}
+\end{Shaded}
+
+4.Convert type from chr to numeric
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# change Charge Duration (min) to numeric}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Charge Duration (min)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{gsub}\NormalTok{(}\StringTok{","}\NormalTok{, }\StringTok{""}\NormalTok{,}
+        \StringTok{\textasciigrave{}}\AttributeTok{Charge Duration (min)}\StringTok{\textasciigrave{}}\NormalTok{)))}
+\CommentTok{\# change Connected Duration (min) to numeric}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{mutate}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Connected Duration (min)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{gsub}\NormalTok{(}\StringTok{","}\NormalTok{,}
+        \StringTok{""}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Connected Duration (min)}\StringTok{\textasciigrave{}}\NormalTok{)))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{4}
+\tightlist
+\item
+  Add columns based on Dates
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Sort the data based on date}
+\NormalTok{ev\_data}\SpecialCharTok{$}\NormalTok{Date }\OtherTok{\textless{}{-}} \FunctionTok{as.Date}\NormalTok{(ev\_data}\SpecialCharTok{$}\NormalTok{Date, }\AttributeTok{format =} \StringTok{"\%m/\%d/\%Y"}\NormalTok{)}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{arrange}\NormalTok{(Date)}
+
+\CommentTok{\# Add weekday column}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}\AttributeTok{weekday =} \FunctionTok{weekdays}\NormalTok{(Date))}
+
+\CommentTok{\# Add is\_weekend}
+\NormalTok{weekends }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\StringTok{"Saturday"}\NormalTok{, }\StringTok{"Sunday"}\NormalTok{)}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{is\_weekend =}\NormalTok{ weekday }\SpecialCharTok{\%in\%}\NormalTok{ weekends}
+\NormalTok{  )}
+
+\CommentTok{\# Add holidays column for year 2024}
+\CommentTok{\# Need to work on this!!}
+\NormalTok{holidays\_2024 }\OtherTok{\textless{}{-}} \FunctionTok{as.Date}\NormalTok{(}\FunctionTok{c}\NormalTok{(}
+  \StringTok{"2024{-}01{-}01"}\NormalTok{, }\CommentTok{\# New Year\textquotesingle{}s Day}
+  \StringTok{"2024{-}01{-}15"}\NormalTok{, }\CommentTok{\# MLK Day}
+  \StringTok{"2024{-}02{-}19"}\NormalTok{, }\CommentTok{\# Presidents\textquotesingle{} Day}
+  \StringTok{"2024{-}05{-}27"}\NormalTok{, }\CommentTok{\# Memorial Day}
+  \StringTok{"2024{-}06{-}19"}\NormalTok{, }\CommentTok{\# Juneteenth}
+  \StringTok{"2024{-}07{-}04"}\NormalTok{, }\CommentTok{\# Independence Day}
+  \StringTok{"2024{-}09{-}02"}\NormalTok{, }\CommentTok{\# Labor Day}
+  \StringTok{"2024{-}10{-}14"}\NormalTok{, }\CommentTok{\# Columbus/Indigenous Peoples\textquotesingle{} Day}
+  \StringTok{"2024{-}11{-}11"}\NormalTok{, }\CommentTok{\# Veterans Day}
+  \StringTok{"2024{-}11{-}28"}\NormalTok{, }\CommentTok{\# Thanksgiving}
+  \StringTok{"2024{-}12{-}25"} \CommentTok{\# Christmas}
+\NormalTok{))}
+
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \AttributeTok{is\_holiday\_2024 =}\NormalTok{ Date }\SpecialCharTok{\%in\%}\NormalTok{ holidays\_2024}
+\NormalTok{  )}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{5}
+\tightlist
+\item
+  Clean the location names:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Standardize location names}
+\NormalTok{ev\_data }\OtherTok{\textless{}{-}}\NormalTok{ ev\_data }\SpecialCharTok{\%\textgreater{}\%}
+  \FunctionTok{mutate}\NormalTok{(}
+    \StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{case\_when}\NormalTok{(}
+      \CommentTok{\# Jerome Gun Hill Road variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"JGU|Jerome.*Gun Hill"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Jerome Gun Hill Road Municipal Parking Garage"}\NormalTok{,}
+
+      \CommentTok{\# Bay Ridge variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"BRI|Bay Ridge"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Bay Ridge Municipal Parking Garage"}\NormalTok{,}
+
+      \CommentTok{\# Delancey and Essex variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"DES|Delancey.*Essex"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Delancey and Essex Municipal Parking Garage"}\NormalTok{,}
+
+      \CommentTok{\# Queens Borough Hall variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"QBO|Queensboro Hall|Queens Borough Hall"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Queens Borough Hall Municipal Parking Garage"}\NormalTok{,}
+
+      \CommentTok{\# Jerome 190th Street variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"JON|Jerome.*190"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Jerome 190th Street Municipal Parking Garage"}\NormalTok{,}
+
+      \CommentTok{\# St. George Courthouse variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"SGE|St}\SpecialCharTok{\textbackslash{}\textbackslash{}}\StringTok{.? George"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"St. George Courthouse Garage"}\NormalTok{,}
+
+      \CommentTok{\# Court Square variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"CSQ|Court Square"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Court Square Municipal Parking Garage"}\NormalTok{,}
+
+      \CommentTok{\# Queens Family Court variations}
+      \FunctionTok{grepl}\NormalTok{(}\StringTok{"QFA|Queens Family Court"}\NormalTok{, }\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{ignore.case =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{\textasciitilde{}}
+        \StringTok{"Queens Family Court Municipal Garage"}\NormalTok{,}
+
+      \CommentTok{\# Handle N/A}
+      \StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}} \SpecialCharTok{==} \StringTok{"N/A"} \SpecialCharTok{\textasciitilde{}} \ConstantTok{NA\_character\_}\NormalTok{,}
+
+      \CommentTok{\# Keep everything else as is}
+      \ConstantTok{TRUE} \SpecialCharTok{\textasciitilde{}} \StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}
+\NormalTok{    )}
+\NormalTok{  )}
+
+\CommentTok{\# Check the results}
+\FunctionTok{unique}\NormalTok{(ev\_data}\SpecialCharTok{$}\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] "Delancey and Essex Municipal Parking Garage"  
+## [2] "Court Square Municipal Parking Garage"        
+## [3] "Jerome 190th Street Municipal Parking Garage" 
+## [4] "Bay Ridge Municipal Parking Garage"           
+## [5] "St. George Courthouse Garage"                 
+## [6] "Queens Family Court Municipal Garage"         
+## [7] "Queens Borough Hall Municipal Parking Garage" 
+## [8] "Jerome Gun Hill Road Municipal Parking Garage"
+## [9] NA
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Count how many of each location}
+\NormalTok{ev\_data }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{count}\NormalTok{(}\StringTok{\textasciigrave{}}\AttributeTok{Location Name}\StringTok{\textasciigrave{}}\NormalTok{, }\AttributeTok{sort =} \ConstantTok{TRUE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##                                   Location Name    n
+## 1   Delancey and Essex Municipal Parking Garage 9030
+## 2         Court Square Municipal Parking Garage 8357
+## 3  Queens Borough Hall Municipal Parking Garage 3228
+## 4  Jerome 190th Street Municipal Parking Garage  832
+## 5            Bay Ridge Municipal Parking Garage  732
+## 6                  St. George Courthouse Garage  640
+## 7          Queens Family Court Municipal Garage  344
+## 8 Jerome Gun Hill Road Municipal Parking Garage  220
+## 9                                          <NA>    8
+\end{verbatim}
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\setcounter{enumi}{6}
+\tightlist
+\item
+  Data info:
+\end{enumerate}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{head}\NormalTok{(ev\_data, }\DecValTok{10}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+##          Date Station Name                                Location Name
+## 1  2021-07-31      EVB0301  Delancey and Essex Municipal Parking Garage
+## 2  2021-07-31      EVB0302  Delancey and Essex Municipal Parking Garage
+## 3  2021-07-31      EVB0305        Court Square Municipal Parking Garage
+## 4  2021-07-31      EVB0415 Jerome 190th Street Municipal Parking Garage
+## 5  2021-07-31      EVB0415 Jerome 190th Street Municipal Parking Garage
+## 6  2021-07-31        NYC19           Bay Ridge Municipal Parking Garage
+## 7  2021-07-31   NYCDOT DE2  Delancey and Essex Municipal Parking Garage
+## 8  2021-07-31   NYCDOT DE3  Delancey and Essex Municipal Parking Garage
+## 9  2021-08-01      EVB0294           Bay Ridge Municipal Parking Garage
+## 10 2021-08-01      EVB0297        Court Square Municipal Parking Garage
+##    Connector ID               ID Tag Connected Time Disconnected Time
+## 1             1 25JES6HTLHYJZZJ7IZBP       19:12:43          21:45:13
+## 2             1 AE6032D1R8SRN00UQ25D       22:32:32          07:44:35
+## 3             1 WZTIYJAVUDXQ9S8YPT6F       23:03:26          11:08:02
+## 4             1           gHIPSZS6I5       09:58:31          11:25:40
+## 5             1 GXS7PP6E3I9I7VMCG9N8       12:02:16          15:08:23
+## 6             1 UKYOL0P8H8V5RWTNTR1N       13:28:25          05:17:19
+## 7             1 96P3P12RR3ECT6LHEYR0       19:42:05          17:00:42
+## 8             1           5fwg1oJTG6       10:25:35          20:40:03
+## 9             1             A6CE494E       12:50:52          06:24:20
+## 10            1 Q0TNUAGIQVBQER6VVC61       10:49:21          17:36:38
+##    Charge Duration (min) Connected Duration (min) Energy Provided (kWh)
+## 1               152.5000                 152.5000                16.251
+## 2               552.0500                 552.0500                57.683
+## 3               290.1667                 724.6000                31.030
+## 4                87.1500                  87.1500                 9.301
+## 5               135.4167                 186.1167                10.357
+## 6               325.0462                 948.9072                31.333
+## 7              1275.2539                1278.6044                50.745
+## 8               230.0212                 614.4603                22.547
+## 9               140.6333                1053.4667                13.318
+## 10              407.2833                 407.2833                45.347
+##    Session Status  weekday is_weekend is_holiday_2024
+## 1            PAID Saturday       TRUE           FALSE
+## 2            PAID Saturday       TRUE           FALSE
+## 3            PAID Saturday       TRUE           FALSE
+## 4            PAID Saturday       TRUE           FALSE
+## 5            PAID Saturday       TRUE           FALSE
+## 6            PAID Saturday       TRUE           FALSE
+## 7            PAID Saturday       TRUE           FALSE
+## 8            PAID Saturday       TRUE           FALSE
+## 9            PAID   Sunday       TRUE           FALSE
+## 10           PAID   Sunday       TRUE           FALSE
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Print column names nicely}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Column names:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Column names:
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\FunctionTok{paste}\NormalTok{(}\DecValTok{1}\SpecialCharTok{:}\FunctionTok{length}\NormalTok{(}\FunctionTok{names}\NormalTok{(ev\_data)), }\FunctionTok{names}\NormalTok{(ev\_data), }\AttributeTok{sep =} \StringTok{". "}\NormalTok{),}
+    \AttributeTok{sep =} \StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 1. Date
+## 2. Station Name
+## 3. Location Name
+## 4. Connector ID
+## 5. ID Tag
+## 6. Connected Time
+## 7. Disconnected Time
+## 8. Charge Duration (min)
+## 9. Connected Duration (min)
+## 10. Energy Provided (kWh)
+## 11. Session Status
+## 12. weekday
+## 13. is_weekend
+## 14. is_holiday_2024
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{write.csv}\NormalTok{(ev\_data, }\StringTok{"EV\_data\_processed.csv"}\NormalTok{, }\AttributeTok{row.names =} \ConstantTok{FALSE}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Data Loading and
+Preparation}\label{data-loading-and-preparation}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Load your dataset here Example: Replace with your actual}
+\CommentTok{\# data loading data \textless{}{-} read.csv(\textquotesingle{}your\_data.csv\textquotesingle{}) data \textless{}{-}}
+\CommentTok{\# read.xlsx(\textquotesingle{}your\_data.xlsx\textquotesingle{})}
+
+\CommentTok{\# For demonstration, we\textquotesingle{}ll use the built{-}in mtcars dataset}
+\NormalTok{data }\OtherTok{\textless{}{-}}\NormalTok{ mtcars}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{cyl }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{cyl)  }\CommentTok{\# Convert to factor for categorical analysis}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{vs }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{vs)}
+\NormalTok{data}\SpecialCharTok{$}\NormalTok{am }\OtherTok{\textless{}{-}} \FunctionTok{factor}\NormalTok{(data}\SpecialCharTok{$}\NormalTok{am)}
+
+\CommentTok{\# Display basic information about the dataset}
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Dataset dimensions:"}\NormalTok{, }\FunctionTok{dim}\NormalTok{(data), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Dataset dimensions: 32 11
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Variable names:"}\NormalTok{, }\FunctionTok{names}\NormalTok{(data), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Variable names: mpg cyl disp hp drat wt qsec vs am gear carb
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{str}\NormalTok{(data)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 'data.frame':    32 obs. of  11 variables:
+##  $ mpg : num  21 21 22.8 21.4 18.7 18.1 14.3 24.4 22.8 19.2 ...
+##  $ cyl : Factor w/ 3 levels "4","6","8": 2 2 1 2 3 2 3 1 1 2 ...
+##  $ disp: num  160 160 108 258 360 ...
+##  $ hp  : num  110 110 93 110 175 105 245 62 95 123 ...
+##  $ drat: num  3.9 3.9 3.85 3.08 3.15 2.76 3.21 3.69 3.92 3.92 ...
+##  $ wt  : num  2.62 2.88 2.32 3.21 3.44 ...
+##  $ qsec: num  16.5 17 18.6 19.4 17 ...
+##  $ vs  : Factor w/ 2 levels "0","1": 1 1 2 2 1 2 1 2 2 2 ...
+##  $ am  : Factor w/ 2 levels "0","1": 2 2 2 1 1 1 1 1 1 1 ...
+##  $ gear: num  4 4 4 3 3 3 3 4 4 4 ...
+##  $ carb: num  4 4 1 1 2 1 4 2 2 4 ...
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Preview the data}
+\FunctionTok{kable}\NormalTok{(}\FunctionTok{head}\NormalTok{(data, }\DecValTok{10}\NormalTok{), }\AttributeTok{caption =} \StringTok{"First 10 rows of the dataset"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{lrlrrrrrllrr}
+\caption{\label{tab:data-preview}First 10 rows of the dataset}\\
+\toprule
+ & mpg & cyl & disp & hp & drat & wt & qsec & vs & am & gear & carb\\
+\midrule
+\cellcolor{gray!10}{Mazda RX4} & \cellcolor{gray!10}{21.0} & \cellcolor{gray!10}{6} & \cellcolor{gray!10}{160.0} & \cellcolor{gray!10}{110} & \cellcolor{gray!10}{3.90} & \cellcolor{gray!10}{2.620} & \cellcolor{gray!10}{16.46} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{1} & \cellcolor{gray!10}{4} & \cellcolor{gray!10}{4}\\
+Mazda RX4 Wag & 21.0 & 6 & 160.0 & 110 & 3.90 & 2.875 & 17.02 & 0 & 1 & 4 & 4\\
+\cellcolor{gray!10}{Datsun 710} & \cellcolor{gray!10}{22.8} & \cellcolor{gray!10}{4} & \cellcolor{gray!10}{108.0} & \cellcolor{gray!10}{93} & \cellcolor{gray!10}{3.85} & \cellcolor{gray!10}{2.320} & \cellcolor{gray!10}{18.61} & \cellcolor{gray!10}{1} & \cellcolor{gray!10}{1} & \cellcolor{gray!10}{4} & \cellcolor{gray!10}{1}\\
+Hornet 4 Drive & 21.4 & 6 & 258.0 & 110 & 3.08 & 3.215 & 19.44 & 1 & 0 & 3 & 1\\
+\cellcolor{gray!10}{Hornet Sportabout} & \cellcolor{gray!10}{18.7} & \cellcolor{gray!10}{8} & \cellcolor{gray!10}{360.0} & \cellcolor{gray!10}{175} & \cellcolor{gray!10}{3.15} & \cellcolor{gray!10}{3.440} & \cellcolor{gray!10}{17.02} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{3} & \cellcolor{gray!10}{2}\\
+\addlinespace
+Valiant & 18.1 & 6 & 225.0 & 105 & 2.76 & 3.460 & 20.22 & 1 & 0 & 3 & 1\\
+\cellcolor{gray!10}{Duster 360} & \cellcolor{gray!10}{14.3} & \cellcolor{gray!10}{8} & \cellcolor{gray!10}{360.0} & \cellcolor{gray!10}{245} & \cellcolor{gray!10}{3.21} & \cellcolor{gray!10}{3.570} & \cellcolor{gray!10}{15.84} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{3} & \cellcolor{gray!10}{4}\\
+Merc 240D & 24.4 & 4 & 146.7 & 62 & 3.69 & 3.190 & 20.00 & 1 & 0 & 4 & 2\\
+\cellcolor{gray!10}{Merc 230} & \cellcolor{gray!10}{22.8} & \cellcolor{gray!10}{4} & \cellcolor{gray!10}{140.8} & \cellcolor{gray!10}{95} & \cellcolor{gray!10}{3.92} & \cellcolor{gray!10}{3.150} & \cellcolor{gray!10}{22.90} & \cellcolor{gray!10}{1} & \cellcolor{gray!10}{0} & \cellcolor{gray!10}{4} & \cellcolor{gray!10}{2}\\
+Merc 280 & 19.2 & 6 & 167.6 & 123 & 3.92 & 3.440 & 18.30 & 1 & 0 & 4 & 4\\
+\bottomrule
+\end{longtable}
+
+\section{Frequency Tables}\label{frequency-tables}
+
+\subsection{Absolute Frequency Tables}\label{absolute-frequency-tables}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For categorical variables}
+\NormalTok{categorical\_vars }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(data, is.factor)}
+\NormalTok{cat\_data }\OtherTok{\textless{}{-}}\NormalTok{ data[, categorical\_vars, drop }\OtherTok{=} \ConstantTok{FALSE}\NormalTok{]}
+
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(cat\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+    \ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(cat\_data)) \{}
+        \FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{\#\#\# Absolute Frequency Table for"}\NormalTok{, var, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{        freq\_table }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(cat\_data[[var]])}
+        \FunctionTok{print}\NormalTok{(}\FunctionTok{kable}\NormalTok{(freq\_table, }\AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(var, }\StringTok{"Frequency"}\NormalTok{),}
+            \AttributeTok{caption =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Absolute Frequency Table for"}\NormalTok{, var)) }\SpecialCharTok{\%\textgreater{}\%}
+            \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{)))}
+\NormalTok{    \}}
+\NormalTok{\} }\ControlFlowTok{else}\NormalTok{ \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"No categorical variables found in the dataset.}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## ### Absolute Frequency Table for cyl 
+## 
+## \begin{longtable}[t]{lr}
+## \caption{\label{tab:absolute-frequency-tables}Absolute Frequency Table for cyl}\\
+## \toprule
+## cyl & Frequency\\
+## \midrule
+## \cellcolor{gray!10}{4} & \cellcolor{gray!10}{11}\\
+## 6 & 7\\
+## \cellcolor{gray!10}{8} & \cellcolor{gray!10}{14}\\
+## \bottomrule
+## \end{longtable}
+## 
+## ### Absolute Frequency Table for vs 
+## 
+## \begin{longtable}[t]{lr}
+## \caption{\label{tab:absolute-frequency-tables}Absolute Frequency Table for vs}\\
+## \toprule
+## vs & Frequency\\
+## \midrule
+## \cellcolor{gray!10}{0} & \cellcolor{gray!10}{18}\\
+## 1 & 14\\
+## \bottomrule
+## \end{longtable}
+## 
+## ### Absolute Frequency Table for am 
+## 
+## \begin{longtable}[t]{lr}
+## \caption{\label{tab:absolute-frequency-tables}Absolute Frequency Table for am}\\
+## \toprule
+## am & Frequency\\
+## \midrule
+## \cellcolor{gray!10}{0} & \cellcolor{gray!10}{19}\\
+## 1 & 13\\
+## \bottomrule
+## \end{longtable}
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For numerical variables (binned)}
+\NormalTok{numerical\_vars }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(data, is.numeric)}
+\NormalTok{num\_data }\OtherTok{\textless{}{-}}\NormalTok{ data[, numerical\_vars, drop }\OtherTok{=} \ConstantTok{FALSE}\NormalTok{]}
+
+\ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(num\_data)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]) \{}
+    \CommentTok{\# Show first 2 numerical variables as example}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{\#\#\# Binned Frequency Table for"}\NormalTok{, var, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{    breaks }\OtherTok{\textless{}{-}} \FunctionTok{pretty}\NormalTok{(num\_data[[var]], }\AttributeTok{n =} \DecValTok{8}\NormalTok{)}
+\NormalTok{    freq\_table }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{cut}\NormalTok{(num\_data[[var]], }\AttributeTok{breaks =}\NormalTok{ breaks,}
+        \AttributeTok{include.lowest =} \ConstantTok{TRUE}\NormalTok{))}
+    \FunctionTok{print}\NormalTok{(}\FunctionTok{kable}\NormalTok{(freq\_table, }\AttributeTok{col.names =} \FunctionTok{c}\NormalTok{(}\StringTok{"Interval"}\NormalTok{, }\StringTok{"Frequency"}\NormalTok{),}
+        \AttributeTok{caption =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Binned Frequency Table for"}\NormalTok{, var)) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{)))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## ### Binned Frequency Table for mpg 
+## 
+## \begin{longtable}[t]{lr}
+## \caption{\label{tab:absolute-frequency-tables}Binned Frequency Table for mpg}\\
+## \toprule
+## Interval & Frequency\\
+## \midrule
+## \cellcolor{gray!10}{{}[10,15]} & \cellcolor{gray!10}{6}\\
+## (15,20] & 12\\
+## \cellcolor{gray!10}{(20,25]} & \cellcolor{gray!10}{8}\\
+## (25,30] & 2\\
+## \cellcolor{gray!10}{(30,35]} & \cellcolor{gray!10}{4}\\
+## \bottomrule
+## \end{longtable}
+## 
+## ### Binned Frequency Table for disp 
+## 
+## \begin{longtable}[t]{lr}
+## \caption{\label{tab:absolute-frequency-tables}Binned Frequency Table for disp}\\
+## \toprule
+## Interval & Frequency\\
+## \midrule
+## \cellcolor{gray!10}{{}[50,100]} & \cellcolor{gray!10}{5}\\
+## (100,150] & 7\\
+## \cellcolor{gray!10}{(150,200]} & \cellcolor{gray!10}{4}\\
+## (200,250] & 1\\
+## \cellcolor{gray!10}{(250,300]} & \cellcolor{gray!10}{4}\\
+## \addlinespace
+## (300,350] & 4\\
+## \cellcolor{gray!10}{(350,400]} & \cellcolor{gray!10}{4}\\
+## (400,450] & 1\\
+## \cellcolor{gray!10}{(450,500]} & \cellcolor{gray!10}{2}\\
+## \bottomrule
+## \end{longtable}
+\end{verbatim}
+
+\subsection{Relative Frequency Tables}\label{relative-frequency-tables}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For categorical variables}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(cat\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+    \ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(cat\_data)) \{}
+        \FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{\#\#\# Relative Frequency Table for"}\NormalTok{, var, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{        freq\_table }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(cat\_data[[var]])}
+\NormalTok{        rel\_freq\_table }\OtherTok{\textless{}{-}} \FunctionTok{prop.table}\NormalTok{(freq\_table)}
+\NormalTok{        rel\_freq\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Category =} \FunctionTok{names}\NormalTok{(rel\_freq\_table),}
+            \StringTok{\textasciigrave{}}\AttributeTok{Relative Frequency}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{as.numeric}\NormalTok{(rel\_freq\_table),}
+            \AttributeTok{Percentage =} \FunctionTok{as.numeric}\NormalTok{(rel\_freq\_table) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{)}
+        \FunctionTok{print}\NormalTok{(}\FunctionTok{kable}\NormalTok{(rel\_freq\_df, }\AttributeTok{digits =} \DecValTok{4}\NormalTok{, }\AttributeTok{caption =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Relative Frequency Table for"}\NormalTok{,}
+\NormalTok{            var)) }\SpecialCharTok{\%\textgreater{}\%}
+            \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{)))}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## ### Relative Frequency Table for cyl 
+## 
+## \begin{longtable}[t]{lrr}
+## \caption{\label{tab:relative-frequency-tables}Relative Frequency Table for cyl}\\
+## \toprule
+## Category & Relative.Frequency & Percentage\\
+## \midrule
+## \cellcolor{gray!10}{4} & \cellcolor{gray!10}{0.3438} & \cellcolor{gray!10}{34.375}\\
+## 6 & 0.2188 & 21.875\\
+## \cellcolor{gray!10}{8} & \cellcolor{gray!10}{0.4375} & \cellcolor{gray!10}{43.750}\\
+## \bottomrule
+## \end{longtable}
+## 
+## ### Relative Frequency Table for vs 
+## 
+## \begin{longtable}[t]{lrr}
+## \caption{\label{tab:relative-frequency-tables}Relative Frequency Table for vs}\\
+## \toprule
+## Category & Relative.Frequency & Percentage\\
+## \midrule
+## \cellcolor{gray!10}{0} & \cellcolor{gray!10}{0.5625} & \cellcolor{gray!10}{56.25}\\
+## 1 & 0.4375 & 43.75\\
+## \bottomrule
+## \end{longtable}
+## 
+## ### Relative Frequency Table for am 
+## 
+## \begin{longtable}[t]{lrr}
+## \caption{\label{tab:relative-frequency-tables}Relative Frequency Table for am}\\
+## \toprule
+## Category & Relative.Frequency & Percentage\\
+## \midrule
+## \cellcolor{gray!10}{0} & \cellcolor{gray!10}{0.5938} & \cellcolor{gray!10}{59.375}\\
+## 1 & 0.4062 & 40.625\\
+## \bottomrule
+## \end{longtable}
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# For numerical variables (binned)}
+\ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(num\_data)[}\DecValTok{1}\SpecialCharTok{:}\DecValTok{2}\NormalTok{]) \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{\#\#\# Relative Frequency Table for"}\NormalTok{, var, }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{    breaks }\OtherTok{\textless{}{-}} \FunctionTok{pretty}\NormalTok{(num\_data[[var]], }\AttributeTok{n =} \DecValTok{8}\NormalTok{)}
+\NormalTok{    freq\_table }\OtherTok{\textless{}{-}} \FunctionTok{table}\NormalTok{(}\FunctionTok{cut}\NormalTok{(num\_data[[var]], }\AttributeTok{breaks =}\NormalTok{ breaks,}
+        \AttributeTok{include.lowest =} \ConstantTok{TRUE}\NormalTok{))}
+\NormalTok{    rel\_freq\_table }\OtherTok{\textless{}{-}} \FunctionTok{prop.table}\NormalTok{(freq\_table)}
+\NormalTok{    rel\_freq\_df }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Interval =} \FunctionTok{names}\NormalTok{(rel\_freq\_table),}
+        \StringTok{\textasciigrave{}}\AttributeTok{Relative Frequency}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{as.numeric}\NormalTok{(rel\_freq\_table), }\AttributeTok{Percentage =} \FunctionTok{as.numeric}\NormalTok{(rel\_freq\_table) }\SpecialCharTok{*}
+            \DecValTok{100}\NormalTok{)}
+    \FunctionTok{print}\NormalTok{(}\FunctionTok{kable}\NormalTok{(rel\_freq\_df, }\AttributeTok{digits =} \DecValTok{4}\NormalTok{, }\AttributeTok{caption =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Relative Frequency Table for"}\NormalTok{,}
+\NormalTok{        var)) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{)))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## ### Relative Frequency Table for mpg 
+## 
+## \begin{longtable}[t]{lrr}
+## \caption{\label{tab:relative-frequency-tables}Relative Frequency Table for mpg}\\
+## \toprule
+## Interval & Relative.Frequency & Percentage\\
+## \midrule
+## \cellcolor{gray!10}{{}[10,15]} & \cellcolor{gray!10}{0.1875} & \cellcolor{gray!10}{18.75}\\
+## (15,20] & 0.3750 & 37.50\\
+## \cellcolor{gray!10}{(20,25]} & \cellcolor{gray!10}{0.2500} & \cellcolor{gray!10}{25.00}\\
+## (25,30] & 0.0625 & 6.25\\
+## \cellcolor{gray!10}{(30,35]} & \cellcolor{gray!10}{0.1250} & \cellcolor{gray!10}{12.50}\\
+## \bottomrule
+## \end{longtable}
+## 
+## ### Relative Frequency Table for disp 
+## 
+## \begin{longtable}[t]{lrr}
+## \caption{\label{tab:relative-frequency-tables}Relative Frequency Table for disp}\\
+## \toprule
+## Interval & Relative.Frequency & Percentage\\
+## \midrule
+## \cellcolor{gray!10}{{}[50,100]} & \cellcolor{gray!10}{0.1562} & \cellcolor{gray!10}{15.625}\\
+## (100,150] & 0.2188 & 21.875\\
+## \cellcolor{gray!10}{(150,200]} & \cellcolor{gray!10}{0.1250} & \cellcolor{gray!10}{12.500}\\
+## (200,250] & 0.0312 & 3.125\\
+## \cellcolor{gray!10}{(250,300]} & \cellcolor{gray!10}{0.1250} & \cellcolor{gray!10}{12.500}\\
+## \addlinespace
+## (300,350] & 0.1250 & 12.500\\
+## \cellcolor{gray!10}{(350,400]} & \cellcolor{gray!10}{0.1250} & \cellcolor{gray!10}{12.500}\\
+## (400,450] & 0.0312 & 3.125\\
+## \cellcolor{gray!10}{(450,500]} & \cellcolor{gray!10}{0.0625} & \cellcolor{gray!10}{6.250}\\
+## \bottomrule
+## \end{longtable}
+\end{verbatim}
+
+\section{Bar Plots}\label{bar-plots}
+
+\subsection{Absolute Frequency Bar
+Plots}\label{absolute-frequency-bar-plots}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(cat\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    plots\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+    \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(}\FunctionTok{names}\NormalTok{(cat\_data))) \{}
+\NormalTok{        var }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(cat\_data)[i]}
+\NormalTok{        p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(cat\_data, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{x =}\NormalTok{ var)) }\SpecialCharTok{+} \FunctionTok{geom\_bar}\NormalTok{(}\AttributeTok{fill =} \StringTok{"steelblue"}\NormalTok{,}
+            \AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Absolute Frequency Bar Plot for"}\NormalTok{,}
+\NormalTok{            var), }\AttributeTok{x =}\NormalTok{ var, }\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+            \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\NormalTok{        plots\_list[[i]] }\OtherTok{\textless{}{-}}\NormalTok{ p}
+\NormalTok{    \}}
+
+    \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(plots\_list) }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{) \{}
+        \FunctionTok{do.call}\NormalTok{(grid.arrange, }\FunctionTok{c}\NormalTok{(plots\_list, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{))}
+\NormalTok{    \} }\ControlFlowTok{else}\NormalTok{ \{}
+        \FunctionTok{print}\NormalTok{(plots\_list[[}\DecValTok{1}\NormalTok{]])}
+\NormalTok{    \}}
+\NormalTok{\} }\ControlFlowTok{else}\NormalTok{ \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"No categorical variables for bar plots.}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/absolute-barplots-1} \end{center}
+
+\subsection{Relative Frequency Bar
+Plots}\label{relative-frequency-bar-plots}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(cat\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    plots\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+    \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(}\FunctionTok{names}\NormalTok{(cat\_data))) \{}
+\NormalTok{        var }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(cat\_data)[i]}
+\NormalTok{        p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(cat\_data, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{x =}\NormalTok{ var)) }\SpecialCharTok{+} \FunctionTok{geom\_bar}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{y =} \FunctionTok{after\_stat}\NormalTok{(count}\SpecialCharTok{/}\FunctionTok{sum}\NormalTok{(count))),}
+            \AttributeTok{fill =} \StringTok{"coral"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Relative Frequency Bar Plot for"}\NormalTok{,}
+\NormalTok{            var), }\AttributeTok{x =}\NormalTok{ var, }\AttributeTok{y =} \StringTok{"Relative Frequency"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+}
+            \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{, }\AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+\NormalTok{        plots\_list[[i]] }\OtherTok{\textless{}{-}}\NormalTok{ p}
+\NormalTok{    \}}
+
+    \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(plots\_list) }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{) \{}
+        \FunctionTok{do.call}\NormalTok{(grid.arrange, }\FunctionTok{c}\NormalTok{(plots\_list, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{))}
+\NormalTok{    \} }\ControlFlowTok{else}\NormalTok{ \{}
+        \FunctionTok{print}\NormalTok{(plots\_list[[}\DecValTok{1}\NormalTok{]])}
+\NormalTok{    \}}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/relative-barplots-1} \end{center}
+
+\section{Summary Statistics}\label{summary-statistics}
+
+\subsection{Measures of Center and
+Dispersion}\label{measures-of-center-and-dispersion}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Function to calculate comprehensive summary statistics}
+\NormalTok{comprehensive\_summary }\OtherTok{\textless{}{-}} \ControlFlowTok{function}\NormalTok{(x) \{}
+    \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{is.numeric}\NormalTok{(x)) \{}
+\NormalTok{        stats }\OtherTok{\textless{}{-}} \FunctionTok{c}\NormalTok{(}\AttributeTok{Mean =} \FunctionTok{mean}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{Median =} \FunctionTok{median}\NormalTok{(x,}
+            \AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{Mode =} \FunctionTok{as.numeric}\NormalTok{(}\FunctionTok{names}\NormalTok{(}\FunctionTok{sort}\NormalTok{(}\FunctionTok{table}\NormalTok{(x),}
+            \AttributeTok{decreasing =} \ConstantTok{TRUE}\NormalTok{))[}\DecValTok{1}\NormalTok{]), }\StringTok{\textasciigrave{}}\AttributeTok{Trimmed Mean (10\%)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(x,}
+            \AttributeTok{trim =} \FloatTok{0.1}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\StringTok{\textasciigrave{}}\AttributeTok{Trimmed Mean (20\%)}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{mean}\NormalTok{(x,}
+            \AttributeTok{trim =} \FloatTok{0.2}\NormalTok{, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{IQR =} \FunctionTok{IQR}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+            \AttributeTok{Variance =} \FunctionTok{var}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\StringTok{\textasciigrave{}}\AttributeTok{Std Deviation}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{sd}\NormalTok{(x,}
+                \AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\StringTok{\textasciigrave{}}\AttributeTok{Coeff of Variation}\StringTok{\textasciigrave{}} \OtherTok{=} \FunctionTok{sd}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}\SpecialCharTok{/}\FunctionTok{mean}\NormalTok{(x,}
+                \AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{*} \DecValTok{100}\NormalTok{, }\AttributeTok{Skewness =} \FunctionTok{skewness}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{),}
+            \AttributeTok{Kurtosis =} \FunctionTok{kurtosis}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{Min =} \FunctionTok{min}\NormalTok{(x,}
+                \AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{Max =} \FunctionTok{max}\NormalTok{(x, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{), }\AttributeTok{Range =} \FunctionTok{diff}\NormalTok{(}\FunctionTok{range}\NormalTok{(x,}
+                \AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)))}
+        \FunctionTok{return}\NormalTok{(}\FunctionTok{round}\NormalTok{(stats, }\DecValTok{4}\NormalTok{))}
+\NormalTok{    \} }\ControlFlowTok{else}\NormalTok{ \{}
+        \FunctionTok{return}\NormalTok{(}\ConstantTok{NULL}\NormalTok{)}
+\NormalTok{    \}}
+\NormalTok{\}}
+
+\CommentTok{\# Apply to all numerical variables}
+\NormalTok{summary\_stats }\OtherTok{\textless{}{-}} \FunctionTok{sapply}\NormalTok{(num\_data, comprehensive\_summary)}
+\NormalTok{summary\_stats }\OtherTok{\textless{}{-}} \FunctionTok{as.data.frame}\NormalTok{(summary\_stats)}
+
+\FunctionTok{kable}\NormalTok{(summary\_stats, }\AttributeTok{caption =} \StringTok{"Comprehensive Summary Statistics for Numerical Variables"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{,}
+        \StringTok{"scale\_down"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{lrrrrrrrr}
+\caption{\label{tab:summary-statistics}Comprehensive Summary Statistics for Numerical Variables}\\
+\toprule
+ & mpg & disp & hp & drat & wt & qsec & gear & carb\\
+\midrule
+\cellcolor{gray!10}{Mean} & \cellcolor{gray!10}{20.0906} & \cellcolor{gray!10}{230.7219} & \cellcolor{gray!10}{146.6875} & \cellcolor{gray!10}{3.5966} & \cellcolor{gray!10}{3.2172} & \cellcolor{gray!10}{17.8487} & \cellcolor{gray!10}{3.6875} & \cellcolor{gray!10}{2.8125}\\
+Median & 19.2000 & 196.3000 & 123.0000 & 3.6950 & 3.3250 & 17.7100 & 4.0000 & 2.0000\\
+\cellcolor{gray!10}{Mode} & \cellcolor{gray!10}{10.4000} & \cellcolor{gray!10}{275.8000} & \cellcolor{gray!10}{110.0000} & \cellcolor{gray!10}{3.0700} & \cellcolor{gray!10}{3.4400} & \cellcolor{gray!10}{17.0200} & \cellcolor{gray!10}{3.0000} & \cellcolor{gray!10}{2.0000}\\
+Trimmed Mean (10\%) & 19.6962 & 222.5231 & 141.1923 & 3.5792 & 3.1527 & 17.8277 & 3.6154 & 2.6538\\
+\cellcolor{gray!10}{Trimmed Mean (20\%)} & \cellcolor{gray!10}{19.2200} & \cellcolor{gray!10}{219.1750} & \cellcolor{gray!10}{137.9000} & \cellcolor{gray!10}{3.5755} & \cellcolor{gray!10}{3.1970} & \cellcolor{gray!10}{17.8175} & \cellcolor{gray!10}{3.5500} & \cellcolor{gray!10}{2.7000}\\
+\addlinespace
+IQR & 7.3750 & 205.1750 & 83.5000 & 0.8400 & 1.0288 & 2.0075 & 1.0000 & 2.0000\\
+\cellcolor{gray!10}{Variance} & \cellcolor{gray!10}{36.3241} & \cellcolor{gray!10}{15360.7998} & \cellcolor{gray!10}{4700.8669} & \cellcolor{gray!10}{0.2859} & \cellcolor{gray!10}{0.9574} & \cellcolor{gray!10}{3.1932} & \cellcolor{gray!10}{0.5444} & \cellcolor{gray!10}{2.6089}\\
+Std Deviation & 6.0269 & 123.9387 & 68.5629 & 0.5347 & 0.9785 & 1.7869 & 0.7378 & 1.6152\\
+\cellcolor{gray!10}{Coeff of Variation} & \cellcolor{gray!10}{29.9988} & \cellcolor{gray!10}{53.7178} & \cellcolor{gray!10}{46.7408} & \cellcolor{gray!10}{14.8664} & \cellcolor{gray!10}{30.4129} & \cellcolor{gray!10}{10.0116} & \cellcolor{gray!10}{20.0082} & \cellcolor{gray!10}{57.4293}\\
+Skewness & 0.6404 & 0.4003 & 0.7614 & 0.2789 & 0.4438 & 0.3870 & 0.5546 & 1.1021\\
+\addlinespace
+\cellcolor{gray!10}{Kurtosis} & \cellcolor{gray!10}{2.7995} & \cellcolor{gray!10}{1.9103} & \cellcolor{gray!10}{3.0522} & \cellcolor{gray!10}{2.4351} & \cellcolor{gray!10}{3.1725} & \cellcolor{gray!10}{3.5538} & \cellcolor{gray!10}{2.0568} & \cellcolor{gray!10}{4.5361}\\
+Min & 10.4000 & 71.1000 & 52.0000 & 2.7600 & 1.5130 & 14.5000 & 3.0000 & 1.0000\\
+\cellcolor{gray!10}{Max} & \cellcolor{gray!10}{33.9000} & \cellcolor{gray!10}{472.0000} & \cellcolor{gray!10}{335.0000} & \cellcolor{gray!10}{4.9300} & \cellcolor{gray!10}{5.4240} & \cellcolor{gray!10}{22.9000} & \cellcolor{gray!10}{5.0000} & \cellcolor{gray!10}{8.0000}\\
+Range & 23.5000 & 400.9000 & 283.0000 & 2.1700 & 3.9110 & 8.4000 & 2.0000 & 7.0000\\
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Additional summary using psych package}
+\NormalTok{describe\_stats }\OtherTok{\textless{}{-}} \FunctionTok{describe}\NormalTok{(num\_data)}
+\FunctionTok{kable}\NormalTok{(describe\_stats, }\AttributeTok{digits =} \DecValTok{4}\NormalTok{, }\AttributeTok{caption =} \StringTok{"Descriptive Statistics (psych package)"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+    \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{,}
+        \StringTok{"scale\_down"}\NormalTok{))}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{lrrrrrrrrrrrrr}
+\caption{\label{tab:basic-summary}Descriptive Statistics (psych package)}\\
+\toprule
+ & vars & n & mean & sd & median & trimmed & mad & min & max & range & skew & kurtosis & se\\
+\midrule
+\cellcolor{gray!10}{mpg} & \cellcolor{gray!10}{1} & \cellcolor{gray!10}{32} & \cellcolor{gray!10}{20.0906} & \cellcolor{gray!10}{6.0269} & \cellcolor{gray!10}{19.200} & \cellcolor{gray!10}{19.6962} & \cellcolor{gray!10}{5.4115} & \cellcolor{gray!10}{10.400} & \cellcolor{gray!10}{33.900} & \cellcolor{gray!10}{23.500} & \cellcolor{gray!10}{0.6107} & \cellcolor{gray!10}{-0.3728} & \cellcolor{gray!10}{1.0654}\\
+disp & 2 & 32 & 230.7219 & 123.9387 & 196.300 & 222.5231 & 140.4764 & 71.100 & 472.000 & 400.900 & 0.3817 & -1.2072 & 21.9095\\
+\cellcolor{gray!10}{hp} & \cellcolor{gray!10}{3} & \cellcolor{gray!10}{32} & \cellcolor{gray!10}{146.6875} & \cellcolor{gray!10}{68.5629} & \cellcolor{gray!10}{123.000} & \cellcolor{gray!10}{141.1923} & \cellcolor{gray!10}{77.0952} & \cellcolor{gray!10}{52.000} & \cellcolor{gray!10}{335.000} & \cellcolor{gray!10}{283.000} & \cellcolor{gray!10}{0.7260} & \cellcolor{gray!10}{-0.1356} & \cellcolor{gray!10}{12.1203}\\
+drat & 4 & 32 & 3.5966 & 0.5347 & 3.695 & 3.5792 & 0.7042 & 2.760 & 4.930 & 2.170 & 0.2659 & -0.7147 & 0.0945\\
+\cellcolor{gray!10}{wt} & \cellcolor{gray!10}{5} & \cellcolor{gray!10}{32} & \cellcolor{gray!10}{3.2172} & \cellcolor{gray!10}{0.9785} & \cellcolor{gray!10}{3.325} & \cellcolor{gray!10}{3.1527} & \cellcolor{gray!10}{0.7672} & \cellcolor{gray!10}{1.513} & \cellcolor{gray!10}{5.424} & \cellcolor{gray!10}{3.911} & \cellcolor{gray!10}{0.4231} & \cellcolor{gray!10}{-0.0227} & \cellcolor{gray!10}{0.1730}\\
+\addlinespace
+qsec & 6 & 32 & 17.8487 & 1.7869 & 17.710 & 17.8277 & 1.4159 & 14.500 & 22.900 & 8.400 & 0.3690 & 0.3351 & 0.3159\\
+\cellcolor{gray!10}{gear} & \cellcolor{gray!10}{7} & \cellcolor{gray!10}{32} & \cellcolor{gray!10}{3.6875} & \cellcolor{gray!10}{0.7378} & \cellcolor{gray!10}{4.000} & \cellcolor{gray!10}{3.6154} & \cellcolor{gray!10}{1.4826} & \cellcolor{gray!10}{3.000} & \cellcolor{gray!10}{5.000} & \cellcolor{gray!10}{2.000} & \cellcolor{gray!10}{0.5289} & \cellcolor{gray!10}{-1.0698} & \cellcolor{gray!10}{0.1304}\\
+carb & 8 & 32 & 2.8125 & 1.6152 & 2.000 & 2.6538 & 1.4826 & 1.000 & 8.000 & 7.000 & 1.0509 & 1.2570 & 0.2855\\
+\bottomrule
+\end{longtable}
+
+\section{Box Plots}\label{box-plots}
+
+\subsection{Side-by-Side Box Plots}\label{side-by-side-box-plots}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Box plots for numerical variables}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+    \CommentTok{\# Overall box plots}
+\NormalTok{    num\_data\_long }\OtherTok{\textless{}{-}}\NormalTok{ num\_data }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{pivot\_longer}\NormalTok{(}\FunctionTok{everything}\NormalTok{(), }\AttributeTok{names\_to =} \StringTok{"Variable"}\NormalTok{, }\AttributeTok{values\_to =} \StringTok{"Value"}\NormalTok{)}
+
+\NormalTok{    p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(num\_data\_long, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ Variable, }\AttributeTok{y =}\NormalTok{ Value)) }\SpecialCharTok{+}
+        \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{fill =} \StringTok{"lightblue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \StringTok{"Side{-}by{-}Side Box Plots for All Numerical Variables"}\NormalTok{,}
+        \AttributeTok{x =} \StringTok{"Variables"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Values"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_text}\NormalTok{(}\AttributeTok{angle =} \DecValTok{45}\NormalTok{,}
+        \AttributeTok{hjust =} \DecValTok{1}\NormalTok{))}
+
+    \FunctionTok{print}\NormalTok{(p1)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/side-by-side-boxplots-1} \end{center}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Box plots by categorical variables (if any)}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(cat\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\&\&} \FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    cat\_var }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(cat\_data)[}\DecValTok{1}\NormalTok{]  }\CommentTok{\# Use first categorical variable}
+\NormalTok{    num\_var }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(num\_data)[}\DecValTok{1}\NormalTok{]  }\CommentTok{\# Use first numerical variable}
+
+\NormalTok{    p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{x =}\NormalTok{ cat\_var, }\AttributeTok{y =}\NormalTok{ num\_var, }\AttributeTok{fill =}\NormalTok{ cat\_var)) }\SpecialCharTok{+}
+        \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Box Plot of"}\NormalTok{,}
+\NormalTok{        num\_var, }\StringTok{"by"}\NormalTok{, cat\_var), }\AttributeTok{x =}\NormalTok{ cat\_var, }\AttributeTok{y =}\NormalTok{ num\_var) }\SpecialCharTok{+}
+        \FunctionTok{theme\_minimal}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{theme}\NormalTok{(}\AttributeTok{legend.position =} \StringTok{"none"}\NormalTok{)}
+
+    \FunctionTok{print}\NormalTok{(p2)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/side-by-side-boxplots-2} \end{center}
+
+\section{Scatter Plots and
+Correlations}\label{scatter-plots-and-correlations}
+
+\subsection{Correlation Matrix}\label{correlation-matrix}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Correlation matrix for numerical variables}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{1}\NormalTok{) \{}
+\NormalTok{    cor\_matrix }\OtherTok{\textless{}{-}} \FunctionTok{cor}\NormalTok{(num\_data, }\AttributeTok{use =} \StringTok{"complete.obs"}\NormalTok{)}
+
+    \CommentTok{\# Display correlation matrix as table}
+    \FunctionTok{kable}\NormalTok{(cor\_matrix, }\AttributeTok{digits =} \DecValTok{3}\NormalTok{, }\AttributeTok{caption =} \StringTok{"Correlation Matrix"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{))}
+
+    \CommentTok{\# Visual correlation matrix}
+    \FunctionTok{corrplot}\NormalTok{(cor\_matrix, }\AttributeTok{method =} \StringTok{"color"}\NormalTok{, }\AttributeTok{type =} \StringTok{"upper"}\NormalTok{, }\AttributeTok{order =} \StringTok{"hclust"}\NormalTok{,}
+        \AttributeTok{tl.cex =} \FloatTok{0.8}\NormalTok{, }\AttributeTok{tl.col =} \StringTok{"black"}\NormalTok{, }\AttributeTok{title =} \StringTok{"Correlation Matrix Heatmap"}\NormalTok{,}
+        \AttributeTok{mar =} \FunctionTok{c}\NormalTok{(}\DecValTok{0}\NormalTok{, }\DecValTok{0}\NormalTok{, }\DecValTok{2}\NormalTok{, }\DecValTok{0}\NormalTok{))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/correlation-matrix-1} \end{center}
+
+\subsection{Scatter Plots}\label{scatter-plots}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# if(ncol(num\_data) \textgreater{} 1) \{ \# Create scatter plot matrix}
+\CommentTok{\# pairs(num\_data, main = \textquotesingle{}Scatter Plot Matrix\textquotesingle{}, pch = 19,}
+\CommentTok{\# col = alpha(\textquotesingle{}steelblue\textquotesingle{}, 0.6)) \# Individual scatter plots}
+\CommentTok{\# for first few variable pairs var\_names \textless{}{-}}
+\CommentTok{\# names(num\_data)[1:min(4, ncol(num\_data))] plots\_list \textless{}{-}}
+\CommentTok{\# list() plot\_count \textless{}{-} 1 for(i in 1:(length(var\_names){-}1))}
+\CommentTok{\# \{ for(j in (i+1):length(var\_names)) \{ if(plot\_count \textless{}= 6)}
+\CommentTok{\# \{ \# Limit to 6 plots cor\_val \textless{}{-}}
+\CommentTok{\# cor(num\_data[[var\_names[i]]], num\_data[[var\_names[j]]],}
+\CommentTok{\# use = \textquotesingle{}complete.obs\textquotesingle{}) p \textless{}{-} ggplot(data, aes\_string(x =}
+\CommentTok{\# var\_names[i], y = var\_names[j])) + geom\_point(alpha =}
+\CommentTok{\# 0.6, color = \textquotesingle{}steelblue\textquotesingle{}) + geom\_smooth(method = \textquotesingle{}lm\textquotesingle{}, se}
+\CommentTok{\# = TRUE, color = \textquotesingle{}red\textquotesingle{}) + labs(title = paste(var\_names[i],}
+\CommentTok{\# \textquotesingle{}vs\textquotesingle{}, var\_names[j], \textquotesingle{}\textbackslash{}nCorrelation:\textquotesingle{}, round(cor\_val, 3)))}
+\CommentTok{\# + theme\_minimal() plots\_list[[plot\_count]] \textless{}{-} p}
+\CommentTok{\# plot\_count \textless{}{-} plot\_count + 1 \} \} \} if(length(plots\_list)}
+\CommentTok{\# \textgreater{} 0) \{ do.call(grid.arrange, c(plots\_list, ncol = 2)) \} \}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Histograms}\label{histograms}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    plots\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+
+    \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(}\FunctionTok{names}\NormalTok{(num\_data))) \{}
+\NormalTok{        var }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(num\_data)[i]}
+\NormalTok{        var\_data }\OtherTok{\textless{}{-}}\NormalTok{ num\_data[[var]]}
+
+        \CommentTok{\# Calculate statistics}
+\NormalTok{        mean\_val }\OtherTok{\textless{}{-}} \FunctionTok{mean}\NormalTok{(var\_data, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{        median\_val }\OtherTok{\textless{}{-}} \FunctionTok{median}\NormalTok{(var\_data, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+
+        \CommentTok{\# Determine optimal number of bins using}
+        \CommentTok{\# Freedman{-}Diaconis rule}
+\NormalTok{        iqr\_val }\OtherTok{\textless{}{-}} \FunctionTok{IQR}\NormalTok{(var\_data, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{)}
+\NormalTok{        n }\OtherTok{\textless{}{-}} \FunctionTok{length}\NormalTok{(var\_data[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(var\_data)])}
+\NormalTok{        bin\_width }\OtherTok{\textless{}{-}} \DecValTok{2} \SpecialCharTok{*}\NormalTok{ iqr\_val}\SpecialCharTok{/}\NormalTok{(n}\SpecialCharTok{\^{}}\NormalTok{(}\DecValTok{1}\SpecialCharTok{/}\DecValTok{3}\NormalTok{))}
+\NormalTok{        n\_bins }\OtherTok{\textless{}{-}} \FunctionTok{ceiling}\NormalTok{(}\FunctionTok{diff}\NormalTok{(}\FunctionTok{range}\NormalTok{(var\_data, }\AttributeTok{na.rm =} \ConstantTok{TRUE}\NormalTok{))}\SpecialCharTok{/}\NormalTok{bin\_width)}
+\NormalTok{        n\_bins }\OtherTok{\textless{}{-}} \FunctionTok{max}\NormalTok{(}\DecValTok{5}\NormalTok{, }\FunctionTok{min}\NormalTok{(n\_bins, }\DecValTok{30}\NormalTok{))  }\CommentTok{\# Ensure reasonable number of bins}
+
+\NormalTok{        p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{x =}\NormalTok{ var)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{bins =}\NormalTok{ n\_bins,}
+            \AttributeTok{fill =} \StringTok{"lightblue"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{, }\AttributeTok{color =} \StringTok{"black"}\NormalTok{,}
+            \AttributeTok{linewidth =} \FloatTok{0.3}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept =}\NormalTok{ mean\_val,}
+            \AttributeTok{color =} \StringTok{"red"}\NormalTok{, }\AttributeTok{linetype =} \StringTok{"dashed"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+}
+            \FunctionTok{geom\_vline}\NormalTok{(}\AttributeTok{xintercept =}\NormalTok{ median\_val, }\AttributeTok{color =} \StringTok{"blue"}\NormalTok{,}
+                \AttributeTok{linetype =} \StringTok{"solid"}\NormalTok{, }\AttributeTok{linewidth =} \DecValTok{1}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Histogram of"}\NormalTok{,}
+\NormalTok{            var, }\StringTok{"("}\NormalTok{, n\_bins, }\StringTok{"bins)"}\NormalTok{), }\AttributeTok{subtitle =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Red line: Mean ("}\NormalTok{,}
+            \FunctionTok{round}\NormalTok{(mean\_val, }\DecValTok{2}\NormalTok{), }\StringTok{"), Blue line: Median ("}\NormalTok{, }\FunctionTok{round}\NormalTok{(median\_val,}
+                \DecValTok{2}\NormalTok{), }\StringTok{")"}\NormalTok{), }\AttributeTok{x =}\NormalTok{ var, }\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{        plots\_list[[i]] }\OtherTok{\textless{}{-}}\NormalTok{ p}
+\NormalTok{    \}}
+
+    \CommentTok{\# Arrange plots}
+    \FunctionTok{do.call}\NormalTok{(grid.arrange, }\FunctionTok{c}\NormalTok{(plots\_list, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/histograms-1} \end{center}
+
+\section{Quantile Plots}\label{quantile-plots}
+
+\subsection{Q-Q Plots (Normal Quantile
+Plots)}\label{q-q-plots-normal-quantile-plots}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    plots\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+
+    \ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \FunctionTok{seq\_along}\NormalTok{(}\FunctionTok{names}\NormalTok{(num\_data))) \{}
+\NormalTok{        var }\OtherTok{\textless{}{-}} \FunctionTok{names}\NormalTok{(num\_data)[i]}
+
+\NormalTok{        p }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(data, }\FunctionTok{aes\_string}\NormalTok{(}\AttributeTok{sample =}\NormalTok{ var)) }\SpecialCharTok{+} \FunctionTok{stat\_qq}\NormalTok{() }\SpecialCharTok{+}
+            \FunctionTok{stat\_qq\_line}\NormalTok{(}\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Q{-}Q Plot for"}\NormalTok{,}
+\NormalTok{            var), }\AttributeTok{subtitle =} \StringTok{"Red line shows normal distribution reference"}\NormalTok{) }\SpecialCharTok{+}
+            \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{        plots\_list[[i]] }\OtherTok{\textless{}{-}}\NormalTok{ p}
+\NormalTok{    \}}
+
+    \FunctionTok{do.call}\NormalTok{(grid.arrange, }\FunctionTok{c}\NormalTok{(plots\_list, }\AttributeTok{ncol =} \DecValTok{2}\NormalTok{))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/qq-plots-1} \end{center}
+
+\subsection{Quantile-Quantile Plots Between
+Variables}\label{quantile-quantile-plots-between-variables}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# if(ncol(num\_data) \textgreater{} 1) \{ \# Example: Compare first two}
+\CommentTok{\# numerical variables var1 \textless{}{-} names(num\_data)[1] var2 \textless{}{-}}
+\CommentTok{\# names(num\_data)[2] ggplot(data, aes\_string(x = var1, y =}
+\CommentTok{\# var2)) + geom\_qq() + geom\_abline(slope = 1, intercept =}
+\CommentTok{\# 0, color = \textquotesingle{}red\textquotesingle{}) + labs(title = paste(\textquotesingle{}Quantile{-}Quantile}
+\CommentTok{\# Plot:\textquotesingle{}, var1, \textquotesingle{}vs\textquotesingle{}, var2), subtitle = \textquotesingle{}Red line shows y=x}
+\CommentTok{\# reference\textquotesingle{}) + theme\_minimal() \}}
+\end{Highlighting}
+\end{Shaded}
+
+\section{Box-Cox Transformations}\label{box-cox-transformations}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Test for normality before Box{-}Cox transformation}
+\NormalTok{normality\_results }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Variable =} \FunctionTok{character}\NormalTok{(), }\AttributeTok{Shapiro\_p\_value =} \FunctionTok{numeric}\NormalTok{(),}
+    \AttributeTok{Normal =} \FunctionTok{character}\NormalTok{(), }\AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+    \ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in} \FunctionTok{names}\NormalTok{(num\_data)) \{}
+\NormalTok{        var\_data }\OtherTok{\textless{}{-}}\NormalTok{ num\_data[[var]]}
+\NormalTok{        var\_data }\OtherTok{\textless{}{-}}\NormalTok{ var\_data[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(var\_data) }\SpecialCharTok{\&}\NormalTok{ var\_data }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{]  }\CommentTok{\# Box{-}Cox requires positive values}
+
+        \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(var\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{3} \SpecialCharTok{\&\&} \FunctionTok{length}\NormalTok{(var\_data) }\SpecialCharTok{\textless{}=} \DecValTok{5000}\NormalTok{) \{}
+            \CommentTok{\# Shapiro{-}Wilk limitations}
+\NormalTok{            shapiro\_test }\OtherTok{\textless{}{-}} \FunctionTok{shapiro.test}\NormalTok{(var\_data)}
+\NormalTok{            is\_normal }\OtherTok{\textless{}{-}}\NormalTok{ shapiro\_test}\SpecialCharTok{$}\NormalTok{p.value }\SpecialCharTok{\textgreater{}} \FloatTok{0.05}
+
+\NormalTok{            normality\_results }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(normality\_results, }\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Variable =}\NormalTok{ var,}
+                \AttributeTok{Shapiro\_p\_value =} \FunctionTok{round}\NormalTok{(shapiro\_test}\SpecialCharTok{$}\NormalTok{p.value,}
+                  \DecValTok{6}\NormalTok{), }\AttributeTok{Normal =} \FunctionTok{ifelse}\NormalTok{(is\_normal, }\StringTok{"Yes (p \textgreater{} 0.05)"}\NormalTok{,}
+                  \StringTok{"No (p ≤ 0.05)"}\NormalTok{)))}
+\NormalTok{        \}}
+\NormalTok{    \}}
+
+    \FunctionTok{kable}\NormalTok{(normality\_results, }\AttributeTok{caption =} \StringTok{"Normality Test Results (Shapiro{-}Wilk Test)"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+        \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{))}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{longtable}[t]{lrl}
+\caption{\label{tab:normality-tests}Normality Test Results (Shapiro-Wilk Test)}\\
+\toprule
+Variable & Shapiro\_p\_value & Normal\\
+\midrule
+\cellcolor{gray!10}{mpg} & \cellcolor{gray!10}{0.122881} & \cellcolor{gray!10}{Yes (p > 0.05)}\\
+disp & 0.020807 & No (p ≤ 0.05)\\
+\cellcolor{gray!10}{hp} & \cellcolor{gray!10}{0.048808} & \cellcolor{gray!10}{No (p ≤ 0.05)}\\
+drat & 0.110061 & Yes (p > 0.05)\\
+\cellcolor{gray!10}{wt} & \cellcolor{gray!10}{0.092655} & \cellcolor{gray!10}{Yes (p > 0.05)}\\
+\addlinespace
+qsec & 0.593518 & Yes (p > 0.05)\\
+\cellcolor{gray!10}{gear} & \cellcolor{gray!10}{0.000013} & \cellcolor{gray!10}{No (p ≤ 0.05)}\\
+carb & 0.000438 & No (p ≤ 0.05)\\
+\bottomrule
+\end{longtable}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Apply Box{-}Cox transformation to non{-}normal variables}
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{ncol}\NormalTok{(num\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    non\_normal\_vars }\OtherTok{\textless{}{-}}\NormalTok{ normality\_results}\SpecialCharTok{$}\NormalTok{Variable[normality\_results}\SpecialCharTok{$}\NormalTok{Normal }\SpecialCharTok{==}
+        \StringTok{"No (p ≤ 0.05)"}\NormalTok{]}
+
+    \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(non\_normal\_vars) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+        \FunctionTok{cat}\NormalTok{(}\StringTok{"Applying Box{-}Cox transformations to non{-}normal variables:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+
+\NormalTok{        plots\_list }\OtherTok{\textless{}{-}} \FunctionTok{list}\NormalTok{()}
+\NormalTok{        transformation\_summary }\OtherTok{\textless{}{-}} \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Variable =} \FunctionTok{character}\NormalTok{(),}
+            \AttributeTok{Lambda =} \FunctionTok{numeric}\NormalTok{(), }\AttributeTok{stringsAsFactors =} \ConstantTok{FALSE}\NormalTok{)}
+
+        \ControlFlowTok{for}\NormalTok{ (var }\ControlFlowTok{in}\NormalTok{ non\_normal\_vars) \{}
+\NormalTok{            var\_data }\OtherTok{\textless{}{-}}\NormalTok{ num\_data[[var]]}
+\NormalTok{            var\_data }\OtherTok{\textless{}{-}}\NormalTok{ var\_data[}\SpecialCharTok{!}\FunctionTok{is.na}\NormalTok{(var\_data) }\SpecialCharTok{\&}\NormalTok{ var\_data }\SpecialCharTok{\textgreater{}}
+                \DecValTok{0}\NormalTok{]}
+
+            \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{length}\NormalTok{(var\_data) }\SpecialCharTok{\textgreater{}} \DecValTok{0} \SpecialCharTok{\&\&} \FunctionTok{all}\NormalTok{(var\_data }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{)) \{}
+                \CommentTok{\# Find optimal lambda}
+\NormalTok{                bc\_result }\OtherTok{\textless{}{-}} \FunctionTok{boxCox}\NormalTok{(}\FunctionTok{lm}\NormalTok{(var\_data }\SpecialCharTok{\textasciitilde{}} \DecValTok{1}\NormalTok{), }\AttributeTok{plotit =} \ConstantTok{FALSE}\NormalTok{)}
+\NormalTok{                lambda }\OtherTok{\textless{}{-}}\NormalTok{ bc\_result}\SpecialCharTok{$}\NormalTok{x[}\FunctionTok{which.max}\NormalTok{(bc\_result}\SpecialCharTok{$}\NormalTok{y)]}
+
+                \CommentTok{\# Apply Box{-}Cox transformation}
+                \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{abs}\NormalTok{(lambda) }\SpecialCharTok{\textless{}} \FloatTok{1e{-}06}\NormalTok{) \{}
+\NormalTok{                  transformed\_data }\OtherTok{\textless{}{-}} \FunctionTok{log}\NormalTok{(var\_data)}
+\NormalTok{                  transform\_label }\OtherTok{\textless{}{-}} \StringTok{"Log transformation (λ ≈ 0)"}
+\NormalTok{                \} }\ControlFlowTok{else}\NormalTok{ \{}
+\NormalTok{                  transformed\_data }\OtherTok{\textless{}{-}}\NormalTok{ (var\_data}\SpecialCharTok{\^{}}\NormalTok{lambda }\SpecialCharTok{{-}} \DecValTok{1}\NormalTok{)}\SpecialCharTok{/}\NormalTok{lambda}
+\NormalTok{                  transform\_label }\OtherTok{\textless{}{-}} \FunctionTok{paste}\NormalTok{(}\StringTok{"Box{-}Cox transformation (λ ="}\NormalTok{,}
+                    \FunctionTok{round}\NormalTok{(lambda, }\DecValTok{3}\NormalTok{), }\StringTok{")"}\NormalTok{)}
+\NormalTok{                \}}
+
+                \CommentTok{\# Store transformation info}
+\NormalTok{                transformation\_summary }\OtherTok{\textless{}{-}} \FunctionTok{rbind}\NormalTok{(transformation\_summary,}
+                  \FunctionTok{data.frame}\NormalTok{(}\AttributeTok{Variable =}\NormalTok{ var, }\AttributeTok{Lambda =} \FunctionTok{round}\NormalTok{(lambda,}
+                    \DecValTok{4}\NormalTok{)))}
+
+                \CommentTok{\# Create before/after plots}
+\NormalTok{                p1 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ var\_data), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x)) }\SpecialCharTok{+}
+                  \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{bins =} \DecValTok{20}\NormalTok{, }\AttributeTok{fill =} \StringTok{"lightcoral"}\NormalTok{,}
+                    \AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Before:"}\NormalTok{,}
+\NormalTok{                  var), }\AttributeTok{x =}\NormalTok{ var, }\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{                p2 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ transformed\_data),}
+                  \FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ x)) }\SpecialCharTok{+} \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{bins =} \DecValTok{20}\NormalTok{, }\AttributeTok{fill =} \StringTok{"lightgreen"}\NormalTok{,}
+                  \AttributeTok{alpha =} \FloatTok{0.7}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"After:"}\NormalTok{,}
+\NormalTok{                  transform\_label), }\AttributeTok{x =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Transformed"}\NormalTok{,}
+\NormalTok{                  var), }\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+
+                \CommentTok{\# Q{-}Q plots}
+\NormalTok{                p3 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ var\_data), }\FunctionTok{aes}\NormalTok{(}\AttributeTok{sample =}\NormalTok{ x)) }\SpecialCharTok{+}
+                  \FunctionTok{stat\_qq}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{stat\_qq\_line}\NormalTok{(}\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+} \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Q{-}Q Before:"}\NormalTok{,}
+\NormalTok{                  var)) }\SpecialCharTok{+} \FunctionTok{theme\_minimal}\NormalTok{()}
+
+\NormalTok{                p4 }\OtherTok{\textless{}{-}} \FunctionTok{ggplot}\NormalTok{(}\FunctionTok{data.frame}\NormalTok{(}\AttributeTok{x =}\NormalTok{ transformed\_data),}
+                  \FunctionTok{aes}\NormalTok{(}\AttributeTok{sample =}\NormalTok{ x)) }\SpecialCharTok{+} \FunctionTok{stat\_qq}\NormalTok{() }\SpecialCharTok{+} \FunctionTok{stat\_qq\_line}\NormalTok{(}\AttributeTok{color =} \StringTok{"red"}\NormalTok{) }\SpecialCharTok{+}
+                  \FunctionTok{labs}\NormalTok{(}\AttributeTok{title =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Q{-}Q After:"}\NormalTok{, transform\_label)) }\SpecialCharTok{+}
+                  \FunctionTok{theme\_minimal}\NormalTok{()}
+
+                \CommentTok{\# Combine plots}
+\NormalTok{                combined\_plot }\OtherTok{\textless{}{-}} \FunctionTok{grid.arrange}\NormalTok{(p1, p2, p3, p4,}
+                  \AttributeTok{ncol =} \DecValTok{2}\NormalTok{, }\AttributeTok{top =} \FunctionTok{paste}\NormalTok{(}\StringTok{"Box{-}Cox Transformation for"}\NormalTok{,}
+\NormalTok{                    var))}
+\NormalTok{                plots\_list[[}\FunctionTok{length}\NormalTok{(plots\_list) }\SpecialCharTok{+} \DecValTok{1}\NormalTok{]] }\OtherTok{\textless{}{-}}\NormalTok{ combined\_plot}
+\NormalTok{            \}}
+\NormalTok{        \}}
+
+        \CommentTok{\# Display transformation summary}
+        \ControlFlowTok{if}\NormalTok{ (}\FunctionTok{nrow}\NormalTok{(transformation\_summary) }\SpecialCharTok{\textgreater{}} \DecValTok{0}\NormalTok{) \{}
+            \FunctionTok{kable}\NormalTok{(transformation\_summary, }\AttributeTok{caption =} \StringTok{"Box{-}Cox Transformation Parameters"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%}
+                \FunctionTok{kable\_styling}\NormalTok{(}\AttributeTok{latex\_options =} \FunctionTok{c}\NormalTok{(}\StringTok{"striped"}\NormalTok{, }\StringTok{"hold\_position"}\NormalTok{))}
+\NormalTok{        \}}
+\NormalTok{    \} }\ControlFlowTok{else}\NormalTok{ \{}
+        \FunctionTok{cat}\NormalTok{(}\StringTok{"All variables appear to be normally distributed. No Box{-}Cox transformation needed.}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{    \}}
+\NormalTok{\} }\ControlFlowTok{else}\NormalTok{ \{}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"No numerical variables available for Box{-}Cox transformation.}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Applying Box-Cox transformations to non-normal variables:
+\end{verbatim}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/box-cox-transformations-1} \end{center}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/box-cox-transformations-2} \end{center}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/box-cox-transformations-3} \end{center}
+
+\begin{center}\includegraphics[width=0.8\linewidth]{EV_data_analysis_files/figure-latex/box-cox-transformations-4} \end{center}
+
+\begin{longtable}[t]{lr}
+\caption{\label{tab:box-cox-transformations}Box-Cox Transformation Parameters}\\
+\toprule
+Variable & Lambda\\
+\midrule
+\cellcolor{gray!10}{disp} & \cellcolor{gray!10}{0.2}\\
+hp & 0.1\\
+\cellcolor{gray!10}{gear} & \cellcolor{gray!10}{-1.5}\\
+carb & 0.1\\
+\bottomrule
+\end{longtable}
+
+\section{Summary and Conclusions}\label{summary-and-conclusions}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"\#\# Analysis Summary}\SpecialCharTok{\textbackslash{}n\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## ## Analysis Summary
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Dataset:"}\NormalTok{, }\FunctionTok{deparse}\NormalTok{(}\FunctionTok{substitute}\NormalTok{(data)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Dataset: data
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Total observations:"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(data), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Total observations: 32
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Total variables:"}\NormalTok{, }\FunctionTok{ncol}\NormalTok{(data), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Total variables: 11
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Numerical variables:"}\NormalTok{, }\FunctionTok{sum}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(data, is.numeric)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Numerical variables: 8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"Categorical variables:"}\NormalTok{, }\FunctionTok{sum}\NormalTok{(}\FunctionTok{sapply}\NormalTok{(data, is.factor)), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Categorical variables: 3
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\ControlFlowTok{if}\NormalTok{ (}\FunctionTok{exists}\NormalTok{(}\StringTok{"normality\_results"}\NormalTok{) }\SpecialCharTok{\&\&} \FunctionTok{nrow}\NormalTok{(normality\_results) }\SpecialCharTok{\textgreater{}}
+    \DecValTok{0}\NormalTok{) \{}
+\NormalTok{    normal\_count }\OtherTok{\textless{}{-}} \FunctionTok{sum}\NormalTok{(}\FunctionTok{grepl}\NormalTok{(}\StringTok{"Yes"}\NormalTok{, normality\_results}\SpecialCharTok{$}\NormalTok{Normal))}
+    \FunctionTok{cat}\NormalTok{(}\StringTok{"Variables following normal distribution:"}\NormalTok{, normal\_count,}
+        \StringTok{"out of"}\NormalTok{, }\FunctionTok{nrow}\NormalTok{(normality\_results), }\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\NormalTok{\}}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## Variables following normal distribution: 4 out of 8
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"}\SpecialCharTok{\textbackslash{}n}\StringTok{\#\# Key Findings:}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## 
+## ## Key Findings:
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"{-} Replace this section with your specific findings}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## - Replace this section with your specific findings
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"{-} Describe patterns observed in the data}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## - Describe patterns observed in the data
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"{-} Mention any outliers or unusual observations}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## - Mention any outliers or unusual observations
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"{-} Discuss correlations between variables}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## - Discuss correlations between variables
+\end{verbatim}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{cat}\NormalTok{(}\StringTok{"{-} Summarize transformation results if applicable}\SpecialCharTok{\textbackslash{}n}\StringTok{"}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## - Summarize transformation results if applicable
+\end{verbatim}
+
+\end{document}
