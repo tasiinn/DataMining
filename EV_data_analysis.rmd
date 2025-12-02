@@ -213,7 +213,7 @@ write.csv(ev_data, "EV_data_processed.csv", row.names = FALSE)
 
 ### Frequency Tables
 
-1. Frequency table → Session Status distribution; Weekday distribution; Location distribution
+1.⁠ ⁠Frequency table → Session Status distribution; Day of the week distribution; Weekday vs. Weekend distribution; Location distribution; Charging Start Hours distribution; Charging End Hours distribution
 
 ```{r}
 # 1. Session Status distribution
@@ -227,12 +227,12 @@ session_status_freq <- ev_data %>%
 # Session Status bar chart
 ggplot(session_status_freq, aes(x = reorder(`Session Status`, -n), y = n)) +
   geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), vjust = -0.5) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
   labs(title = "Session Status Distribution", x = "Status", y = "Count") +
   theme_minimal()
 
-print(session_status_freq)
-
-# 2. Weekday distribution
+# 2. Day of the week distribution
 weekday_freq <- ev_data %>%
   count(weekday, sort = TRUE) %>%
   mutate(
@@ -240,15 +240,32 @@ weekday_freq <- ev_data %>%
     percentage = round(percentage, 2)
   )
 
-# Weekday bar chart
+# Day of the week bar chart
 ggplot(weekday_freq, aes(x = reorder(weekday, -n), y = n)) +
   geom_bar(stat = "identity", fill = "darkgreen") +
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), vjust = -0.5) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
   labs(title = "Weekday Distribution", x = "Day", y = "Count") +
   theme_minimal()
 
-print(weekday_freq)
+# 3. Weekday vs. Weekend distribution
+weekend_freq <- ev_data %>%
+  count(is_weekend, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2),
+    type_of_day = ifelse(is_weekend == TRUE, "Weekend", "Weekday") 
+  )
 
-# 3. Location distribution
+# Weekday vs. Weekend bar chart
+ggplot(weekend_freq, aes(x = reorder(type_of_day, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "seagreen") +
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), vjust = -0.5) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Weekday vs Weekend", x = "Type", y = "Count") +
+  theme_minimal()
+
+# 4. Location distribution
 location_freq <- ev_data %>%
   count(`Location Name`, sort = TRUE) %>%
   mutate(
@@ -260,11 +277,48 @@ location_freq <- ev_data %>%
 ggplot(location_freq, aes(x = reorder(`Location Name`, -n), y = n)) +
   geom_bar(stat = "identity", fill = "coral") +
   coord_flip() +  # Flip for better readability
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), hjust = -0.1) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.30))) + # Additional space to account for labels
   labs(title = "Location Distribution", x = "Location", y = "Count") +
   theme_minimal()
 
-print(location_freq)
+# 5. Charging Start Hours distribution
+hourly_freq <- ev_data %>%
+  mutate(
+    time_object = hms(`Connected Time`),
+    hour_start = hour(time_object)
+  ) %>%
+  filter(!is.na(hour_start)) %>%
+  count(hour_start) 
 
+hourly_freq$hour_start <- factor(hourly_freq$hour_start, levels = 0:23)
+
+# Charging Start Hours Bar Chart
+ggplot(hourly_freq, aes(x = hour_start, y = n)) +
+  geom_bar(stat = "identity", fill = "darkviolet") +
+  geom_text(aes(label = n), vjust = -0.5, size = 3.5) + # Label of count
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Peak Charging Start Times", x = "Hour of Day (24h)", y = "Count") +
+  theme_minimal()
+
+# 6. Charging End Hours distribution
+end_hourly_freq <- ev_data %>%
+  mutate(
+    time_object = hms(`Disconnected Time`),
+    hour_end = hour(time_object)
+  ) %>%
+  filter(!is.na(hour_end)) %>%
+  count(hour_end)
+
+end_hourly_freq$hour_end <- factor(end_hourly_freq$hour_end, levels = 0:23)
+
+# Charging End Hours Bar Chart
+ggplot(end_hourly_freq, aes(x = hour_end, y = n)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  geom_text(aes(label = n), vjust = -0.5, size = 3.5) + # Label of count
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Peak Charging End Times", x = "Hour of Day (24h)", y = "Count") +
+  theme_minimal()
 ```
 
 
