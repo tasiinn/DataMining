@@ -209,33 +209,64 @@ write.csv(ev_data, "EV_data_processed.csv", row.names = FALSE)
 ```
 
 
-# Data Loading and Preparation
+# Descriptive Analysis
 
-```{r data-loading}
-# Load your dataset here
-# Example: Replace with your actual data loading
-# data <- read.csv("your_data.csv")
-# data <- read.xlsx("your_data.xlsx")
+### Frequency Tables
 
-# For demonstration, we'll use the built-in mtcars dataset
-data <- mtcars
-data$cyl <- factor(data$cyl)  # Convert to factor for categorical analysis
-data$vs <- factor(data$vs)
-data$am <- factor(data$am)
+1. Frequency table → Session Status distribution; Weekday distribution; Location distribution
 
-# Display basic information about the dataset
-cat("Dataset dimensions:", dim(data), "\n")
-cat("Variable names:", names(data), "\n")
-str(data)
+```{r}
+# 1. Session Status distribution
+session_status_freq <- ev_data %>%
+  count(`Session Status`, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2)
+  )
+
+# Session Status bar chart
+ggplot(session_status_freq, aes(x = reorder(`Session Status`, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Session Status Distribution", x = "Status", y = "Count") +
+  theme_minimal()
+
+print(session_status_freq)
+
+# 2. Weekday distribution
+weekday_freq <- ev_data %>%
+  count(weekday, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2)
+  )
+
+# Weekday bar chart
+ggplot(weekday_freq, aes(x = reorder(weekday, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "darkgreen") +
+  labs(title = "Weekday Distribution", x = "Day", y = "Count") +
+  theme_minimal()
+
+print(weekday_freq)
+
+# 3. Location distribution
+location_freq <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2)
+  )
+
+# Location bar chart
+ggplot(location_freq, aes(x = reorder(`Location Name`, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  coord_flip() +  # Flip for better readability
+  labs(title = "Location Distribution", x = "Location", y = "Count") +
+  theme_minimal()
+
+print(location_freq)
+
 ```
 
-```{r data-preview}
-# Preview the data
-kable(head(data, 10), caption = "First 10 rows of the dataset") %>%
-  kable_styling(latex_options = c("striped", "hold_position"))
-```
-
-# Frequency Tables
 
 ## Absolute Frequency Tables
 
