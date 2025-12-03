@@ -199,8 +199,6 @@ ev_data %>% count(`Location Name`, sort = TRUE)
 ```{r}
 
 head(ev_data, 10)
- 
- 
 # Print column names nicely
 cat("Column names:\n")
 cat(paste(1:length(names(ev_data)), names(ev_data), sep = ". "), sep = "\n")
@@ -322,493 +320,198 @@ ggplot(end_hourly_freq, aes(x = hour_end, y = n)) +
 ```
 
 
-## Absolute Frequency Tables
+```{r}
+### Center and Dispersion Statistics
 
-```{r absolute-frequency-tables}
-# For categorical variables
-categorical_vars <- sapply(data, is.factor)
-cat_data <- data[, categorical_vars, drop = FALSE]
-
-if(ncol(cat_data) > 0) {
-  for(var in names(cat_data)) {
-    cat("\n### Absolute Frequency Table for", var, "\n")
-    freq_table <- table(cat_data[[var]])
-    print(kable(freq_table, col.names = c(var, "Frequency"), 
-                caption = paste("Absolute Frequency Table for", var)) %>%
-          kable_styling(latex_options = c("striped", "hold_position")))
-  }
-} else {
-  cat("No categorical variables found in the dataset.\n")
+# Function to calculate mode (R doesn't have a built-in mode function)
+get_mode <- function(x) {
+  x <- na.omit(x)
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
 }
 
-# For numerical variables (binned)
-numerical_vars <- sapply(data, is.numeric)
-num_data <- data[, numerical_vars, drop = FALSE]
-
-for(var in names(num_data)[1:2]) {  # Show first 2 numerical variables as example
-  cat("\n### Binned Frequency Table for", var, "\n")
-  breaks <- pretty(num_data[[var]], n = 8)
-  freq_table <- table(cut(num_data[[var]], breaks = breaks, include.lowest = TRUE))
-  print(kable(freq_table, col.names = c("Interval", "Frequency"),
-              caption = paste("Binned Frequency Table for", var)) %>%
-        kable_styling(latex_options = c("striped", "hold_position")))
-}
-```
-
-## Relative Frequency Tables
-
-```{r relative-frequency-tables}
-# For categorical variables
-if(ncol(cat_data) > 0) {
-  for(var in names(cat_data)) {
-    cat("\n### Relative Frequency Table for", var, "\n")
-    freq_table <- table(cat_data[[var]])
-    rel_freq_table <- prop.table(freq_table)
-    rel_freq_df <- data.frame(
-      Category = names(rel_freq_table),
-      "Relative Frequency" = as.numeric(rel_freq_table),
-      "Percentage" = as.numeric(rel_freq_table) * 100
-    )
-    print(kable(rel_freq_df, digits = 4,
-                caption = paste("Relative Frequency Table for", var)) %>%
-          kable_styling(latex_options = c("striped", "hold_position")))
-  }
-}
-
-# For numerical variables (binned)
-for(var in names(num_data)[1:2]) {
-  cat("\n### Relative Frequency Table for", var, "\n")
-  breaks <- pretty(num_data[[var]], n = 8)
-  freq_table <- table(cut(num_data[[var]], breaks = breaks, include.lowest = TRUE))
-  rel_freq_table <- prop.table(freq_table)
-  rel_freq_df <- data.frame(
-    Interval = names(rel_freq_table),
-    "Relative Frequency" = as.numeric(rel_freq_table),
-    "Percentage" = as.numeric(rel_freq_table) * 100
+# Function to calculate all statistics for a variable
+calc_stats <- function(x, var_name) {
+  x <- na.omit(x)
+  
+  data.frame(
+    Variable = var_name,
+    Mean = round(mean(x), 3),
+    Median = round(median(x), 3),
+    Mode = round(get_mode(x), 3),
+    Trimmed_Mean_10pct = round(mean(x, trim = 0.10), 3),
+    IQR = round(IQR(x), 3),
+    Variance = round(var(x), 3),
+    Std_Dev = round(sd(x), 3),
+    CV = round((sd(x) / mean(x)) * 100, 2),  # Coefficient of Variation as percentage
+    Skewness = round(skewness(x), 3)
   )
-  print(kable(rel_freq_df, digits = 4,
-              caption = paste("Relative Frequency Table for", var)) %>%
-        kable_styling(latex_options = c("striped", "hold_position")))
-}
-```
-
-# Bar Plots
-
-## Absolute Frequency Bar Plots
-
-```{r absolute-barplots, fig.height=6}
-if(ncol(cat_data) > 0) {
-  plots_list <- list()
-  for(i in seq_along(names(cat_data))) {
-    var <- names(cat_data)[i]
-    p <- ggplot(cat_data, aes_string(x = var)) +
-      geom_bar(fill = "steelblue", alpha = 0.7) +
-      labs(title = paste("Absolute Frequency Bar Plot for", var),
-           x = var, y = "Frequency") +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    plots_list[[i]] <- p
-  }
-  
-  if(length(plots_list) > 1) {
-    do.call(grid.arrange, c(plots_list, ncol = 2))
-  } else {
-    print(plots_list[[1]])
-  }
-} else {
-  cat("No categorical variables for bar plots.\n")
-}
-```
-
-## Relative Frequency Bar Plots
-
-```{r relative-barplots, fig.height=6}
-if(ncol(cat_data) > 0) {
-  plots_list <- list()
-  for(i in seq_along(names(cat_data))) {
-    var <- names(cat_data)[i]
-    p <- ggplot(cat_data, aes_string(x = var)) +
-      geom_bar(aes(y = after_stat(count/sum(count))), fill = "coral", alpha = 0.7) +
-      labs(title = paste("Relative Frequency Bar Plot for", var),
-           x = var, y = "Relative Frequency") +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    plots_list[[i]] <- p
-  }
-  
-  if(length(plots_list) > 1) {
-    do.call(grid.arrange, c(plots_list, ncol = 2))
-  } else {
-    print(plots_list[[1]])
-  }
-}
-```
-
-# Summary Statistics
-
-## Measures of Center and Dispersion
-
-```{r summary-statistics}
-# Function to calculate comprehensive summary statistics
-comprehensive_summary <- function(x) {
-  if(is.numeric(x)) {
-    stats <- c(
-      Mean = mean(x, na.rm = TRUE),
-      Median = median(x, na.rm = TRUE),
-      Mode = as.numeric(names(sort(table(x), decreasing = TRUE))[1]),
-      "Trimmed Mean (10%)" = mean(x, trim = 0.1, na.rm = TRUE),
-      "Trimmed Mean (20%)" = mean(x, trim = 0.2, na.rm = TRUE),
-      IQR = IQR(x, na.rm = TRUE),
-      Variance = var(x, na.rm = TRUE),
-      "Std Deviation" = sd(x, na.rm = TRUE),
-      "Coeff of Variation" = sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE) * 100,
-      Skewness = skewness(x, na.rm = TRUE),
-      Kurtosis = kurtosis(x, na.rm = TRUE),
-      Min = min(x, na.rm = TRUE),
-      Max = max(x, na.rm = TRUE),
-      Range = diff(range(x, na.rm = TRUE))
-    )
-    return(round(stats, 4))
-  } else {
-    return(NULL)
-  }
 }
 
-# Apply to all numerical variables
-summary_stats <- sapply(num_data, comprehensive_summary)
-summary_stats <- as.data.frame(summary_stats)
+# Calculate statistics for Energy Provided and Charge Duration
+energy_stats <- calc_stats(ev_data$`Energy Provided (kWh)`, "Energy Provided (kWh)")
+duration_stats <- calc_stats(ev_data$`Charge Duration (min)`, "Charge Duration (min)")
 
+# Combine into one table
+summary_stats <- rbind(energy_stats, duration_stats)
+
+# Display the table
 kable(summary_stats, 
-      caption = "Comprehensive Summary Statistics for Numerical Variables") %>%
-  kable_styling(latex_options = c("striped", "hold_position", "scale_down"))
+      caption = "Summary Statistics: Measures of Center and Dispersion",
+      col.names = c("Variable", "Mean", "Median", "Mode", "Trimmed Mean (10%)", 
+                    "IQR", "Variance", "Std Dev", "CV (%)", "Skewness"),
+      align = "lrrrrrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
 ```
 
-```{r basic-summary}
-# Additional summary using psych package
-describe_stats <- describe(num_data)
-kable(describe_stats, digits = 4,
-      caption = "Descriptive Statistics (psych package)") %>%
-  kable_styling(latex_options = c("striped", "hold_position", "scale_down"))
+
+
+```{r}
+# Total Energy Consumed by Day of Week
+energy_by_day <- ev_data %>%
+  group_by(weekday) %>%
+  summarise(
+    total_energy = sum(`Energy Provided (kWh)`, na.rm = TRUE),
+    num_sessions = n(),
+    avg_energy = mean(`Energy Provided (kWh)`, na.rm = TRUE)
+  ) %>%
+  mutate(
+    total_energy_rounded = round(total_energy, 0),
+    avg_energy_rounded = round(avg_energy, 2)
+  )
+
+# Bar plot of Total Energy by Weekday
+ggplot(energy_by_day, aes(x = weekday, y = total_energy, fill = weekday)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(format(total_energy_rounded, big.mark = ","), " kWh")), 
+            vjust = -0.5, size = 3.5) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Total Energy Consumed by Day of Week",
+       x = "Day of Week",
+       y = "Total Energy (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
 ```
 
-# Box Plots
+```{r}
+# Total Energy Consumed by Location
+energy_by_location <- ev_data %>%
+  group_by(`Location Name`) %>%
+  summarise(
+    total_energy = sum(`Energy Provided (kWh)`, na.rm = TRUE),
+    num_sessions = n(),
+    avg_energy = mean(`Energy Provided (kWh)`, na.rm = TRUE)
+  ) %>%
+  mutate(
+    total_energy_rounded = round(total_energy, 0),
+    avg_energy_rounded = round(avg_energy, 2)
+  )
 
-## Side-by-Side Box Plots
+# Bar plot of Total Energy by Location
+ggplot(energy_by_location, aes(x = reorder(`Location Name`, total_energy), 
+                                y = total_energy, 
+                                fill = `Location Name`)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(format(total_energy_rounded, big.mark = ","), " kWh")), 
+            hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.20))) +
+  labs(title = "Total Energy Consumed by Location",
+       x = "Location",
+       y = "Total Energy (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set3")
 
-```{r side-by-side-boxplots, fig.height=7}
-# Box plots for numerical variables
-if(ncol(num_data) > 0) {
-  # Overall box plots
-  num_data_long <- num_data %>%
-    pivot_longer(everything(), names_to = "Variable", values_to = "Value")
-  
-  p1 <- ggplot(num_data_long, aes(x = Variable, y = Value)) +
-    geom_boxplot(fill = "lightblue", alpha = 0.7) +
-    labs(title = "Side-by-Side Box Plots for All Numerical Variables",
-         x = "Variables", y = "Values") +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-  
-  print(p1)
-}
-
-# Box plots by categorical variables (if any)
-if(ncol(cat_data) > 0 && ncol(num_data) > 0) {
-  cat_var <- names(cat_data)[1]  # Use first categorical variable
-  num_var <- names(num_data)[1]  # Use first numerical variable
-  
-  p2 <- ggplot(data, aes_string(x = cat_var, y = num_var, fill = cat_var)) +
-    geom_boxplot(alpha = 0.7) +
-    labs(title = paste("Box Plot of", num_var, "by", cat_var),
-         x = cat_var, y = num_var) +
-    theme_minimal() +
-    theme(legend.position = "none")
-  
-  print(p2)
-}
+# Bar plot of Average Energy per Session by Location
+ggplot(energy_by_location, aes(x = reorder(`Location Name`, avg_energy), 
+                                y = avg_energy, 
+                                fill = `Location Name`)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(avg_energy_rounded, " kWh")), 
+            hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Average Energy per Session by Location",
+       x = "Location",
+       y = "Average Energy (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set3")
 ```
 
-# Scatter Plots and Correlations
 
-## Correlation Matrix
+```{r}
+### Heatmap of Temporal Usage (Weekday × Hour of Day)
 
-```{r correlation-matrix}
-# Correlation matrix for numerical variables
-if(ncol(num_data) > 1) {
-  cor_matrix <- cor(num_data, use = "complete.obs")
-  
-  # Display correlation matrix as table
-  kable(cor_matrix, digits = 3,
-        caption = "Correlation Matrix") %>%
-    kable_styling(latex_options = c("striped", "hold_position"))
-  
-  # Visual correlation matrix
-  corrplot(cor_matrix, method = "color", type = "upper", 
-           order = "hclust", tl.cex = 0.8, tl.col = "black",
-           title = "Correlation Matrix Heatmap", mar = c(0,0,2,0))
-}
+# Prepare data: extract hour and summarize
+temporal_data <- ev_data %>%
+  mutate(
+    time_object = hms(`Connected Time`),
+    hour = hour(time_object)
+  ) %>%
+  filter(!is.na(hour)) %>%
+  group_by(weekday, hour) %>%
+  summarise(
+    num_sessions = n(),
+    avg_energy = round(mean(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    total_energy = round(sum(`Energy Provided (kWh)`, na.rm = TRUE), 0),
+    .groups = "drop"
+  )
+
+# Ensure proper weekday order
+temporal_data$weekday <- factor(temporal_data$weekday,
+                                 levels = c("Monday", "Tuesday", "Wednesday", "Thursday",
+                                            "Friday", "Saturday", "Sunday"))
+
+# 1. Heatmap: Number of Sessions by Weekday × Hour
+ggplot(temporal_data, aes(x = hour, y = weekday, fill = num_sessions)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = num_sessions), size = 2.5, color = "black") +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(title = "Number of Charging Sessions by Day and Hour",
+       subtitle = "Identifying peak charging times",
+       x = "Hour of Day (24h)",
+       y = "Day of Week",
+       fill = "Sessions") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+# 2. Heatmap: Average Energy per Session by Weekday × Hour
+ggplot(temporal_data, aes(x = hour, y = weekday, fill = avg_energy)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = avg_energy), size = 2.5, color = "black") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(title = "Average Energy per Session by Day and Hour",
+       subtitle = "When do longer/fuller charges happen?",
+       x = "Hour of Day (24h)",
+       y = "Day of Week",
+       fill = "Avg kWh") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+# 3. Heatmap: Total Energy by Weekday × Hour
+ggplot(temporal_data, aes(x = hour, y = weekday, fill = total_energy)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightgreen", high = "darkgreen") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(title = "Total Energy Consumed by Day and Hour",
+       subtitle = "Grid demand patterns",
+       x = "Hour of Day (24h)",
+       y = "Day of Week",
+       fill = "Total kWh") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
 ```
 
-## Scatter Plots
 
-```{r scatterplots, fig.height=9}
-# if(ncol(num_data) > 1) {
-#   # Create scatter plot matrix
-#   pairs(num_data, 
-#         main = "Scatter Plot Matrix",
-#         pch = 19, 
-#         col = alpha("steelblue", 0.6))
-#   
-#   # Individual scatter plots for first few variable pairs
-#   var_names <- names(num_data)[1:min(4, ncol(num_data))]
-#   plots_list <- list()
-#   plot_count <- 1
-#   
-#   for(i in 1:(length(var_names)-1)) {
-#     for(j in (i+1):length(var_names)) {
-#       if(plot_count <= 6) {  # Limit to 6 plots
-#         cor_val <- cor(num_data[[var_names[i]]], num_data[[var_names[j]]], use = "complete.obs")
-#         
-#         p <- ggplot(data, aes_string(x = var_names[i], y = var_names[j])) +
-#           geom_point(alpha = 0.6, color = "steelblue") +
-#           geom_smooth(method = "lm", se = TRUE, color = "red") +
-#           labs(title = paste(var_names[i], "vs", var_names[j], 
-#                            "\nCorrelation:", round(cor_val, 3))) +
-#           theme_minimal()
-#         
-#         plots_list[[plot_count]] <- p
-#         plot_count <- plot_count + 1
-#       }
-#     }
-#   }
-#   
-#   if(length(plots_list) > 0) {
-#     do.call(grid.arrange, c(plots_list, ncol = 2))
-#   }
-# }
-```
 
-# Histograms
 
-```{r histograms, fig.height=9}
-if(ncol(num_data) > 0) {
-  plots_list <- list()
-  
-  for(i in seq_along(names(num_data))) {
-    var <- names(num_data)[i]
-    var_data <- num_data[[var]]
-    
-    # Calculate statistics
-    mean_val <- mean(var_data, na.rm = TRUE)
-    median_val <- median(var_data, na.rm = TRUE)
-    
-    # Determine optimal number of bins using Freedman-Diaconis rule
-    iqr_val <- IQR(var_data, na.rm = TRUE)
-    n <- length(var_data[!is.na(var_data)])
-    bin_width <- 2 * iqr_val / (n^(1/3))
-    n_bins <- ceiling(diff(range(var_data, na.rm = TRUE)) / bin_width)
-    n_bins <- max(5, min(n_bins, 30))  # Ensure reasonable number of bins
-    
-    p <- ggplot(data, aes_string(x = var)) +
-      geom_histogram(bins = n_bins, fill = "lightblue", 
-                     alpha = 0.7, color = "black", linewidth = 0.3) +
-      geom_vline(xintercept = mean_val, color = "red", 
-                 linetype = "dashed", linewidth = 1) +
-      geom_vline(xintercept = median_val, color = "blue", 
-                 linetype = "solid", linewidth = 1) +
-      labs(title = paste("Histogram of", var, "(", n_bins, "bins)"),
-           subtitle = paste("Red line: Mean (", round(mean_val, 2), 
-                          "), Blue line: Median (", round(median_val, 2), ")"),
-           x = var, y = "Frequency") +
-      theme_minimal()
-    
-    plots_list[[i]] <- p
-  }
-  
-  # Arrange plots
-  do.call(grid.arrange, c(plots_list, ncol = 2))
-}
-```
+#Inferencial Statistics:
 
-# Quantile Plots
-
-## Q-Q Plots (Normal Quantile Plots)
-
-```{r qq-plots, fig.height=9}
-if(ncol(num_data) > 0) {
-  plots_list <- list()
-  
-  for(i in seq_along(names(num_data))) {
-    var <- names(num_data)[i]
-    
-    p <- ggplot(data, aes_string(sample = var)) +
-      stat_qq() +
-      stat_qq_line(color = "red") +
-      labs(title = paste("Q-Q Plot for", var),
-           subtitle = "Red line shows normal distribution reference") +
-      theme_minimal()
-    
-    plots_list[[i]] <- p
-  }
-  
-  do.call(grid.arrange, c(plots_list, ncol = 2))
-}
-```
-
-## Quantile-Quantile Plots Between Variables
-
-```{r qq-between-vars, fig.height=6}
-# if(ncol(num_data) > 1) {
-#   # Example: Compare first two numerical variables
-#   var1 <- names(num_data)[1]
-#   var2 <- names(num_data)[2]
-#   
-#   ggplot(data, aes_string(x = var1, y = var2)) +
-#     geom_qq() +
-#     geom_abline(slope = 1, intercept = 0, color = "red") +
-#     labs(title = paste("Quantile-Quantile Plot:", var1, "vs", var2),
-#          subtitle = "Red line shows y=x reference") +
-#     theme_minimal()
-# }
-```
-
-# Box-Cox Transformations
-
-```{r normality-tests}
-# Test for normality before Box-Cox transformation
-normality_results <- data.frame(
-  Variable = character(),
-  Shapiro_p_value = numeric(),
-  Normal = character(),
-  stringsAsFactors = FALSE
-)
-
-if(ncol(num_data) > 0) {
-  for(var in names(num_data)) {
-    var_data <- num_data[[var]]
-    var_data <- var_data[!is.na(var_data) & var_data > 0]  # Box-Cox requires positive values
-    
-    if(length(var_data) > 3 && length(var_data) <= 5000) {  # Shapiro-Wilk limitations
-      shapiro_test <- shapiro.test(var_data)
-      is_normal <- shapiro_test$p.value > 0.05
-      
-      normality_results <- rbind(normality_results, data.frame(
-        Variable = var,
-        Shapiro_p_value = round(shapiro_test$p.value, 6),
-        Normal = ifelse(is_normal, "Yes (p > 0.05)", "No (p ≤ 0.05)")
-      ))
-    }
-  }
-  
-  kable(normality_results, 
-        caption = "Normality Test Results (Shapiro-Wilk Test)") %>%
-    kable_styling(latex_options = c("striped", "hold_position"))
-}
-```
-
-```{r box-cox-transformations, fig.height=11}
-# Apply Box-Cox transformation to non-normal variables
-if(ncol(num_data) > 0) {
-  non_normal_vars <- normality_results$Variable[normality_results$Normal == "No (p ≤ 0.05)"]
-  
-  if(length(non_normal_vars) > 0) {
-    cat("Applying Box-Cox transformations to non-normal variables:\n")
-    
-    plots_list <- list()
-    transformation_summary <- data.frame(
-      Variable = character(),
-      Lambda = numeric(),
-      stringsAsFactors = FALSE
-    )
-    
-    for(var in non_normal_vars) {
-      var_data <- num_data[[var]]
-      var_data <- var_data[!is.na(var_data) & var_data > 0]
-      
-      if(length(var_data) > 0 && all(var_data > 0)) {
-        # Find optimal lambda
-        bc_result <- boxCox(lm(var_data ~ 1), plotit = FALSE)
-        lambda <- bc_result$x[which.max(bc_result$y)]
-        
-        # Apply Box-Cox transformation
-        if(abs(lambda) < 1e-6) {
-          transformed_data <- log(var_data)
-          transform_label <- "Log transformation (λ ≈ 0)"
-        } else {
-          transformed_data <- (var_data^lambda - 1) / lambda
-          transform_label <- paste("Box-Cox transformation (λ =", round(lambda, 3), ")")
-        }
-        
-        # Store transformation info
-        transformation_summary <- rbind(transformation_summary, data.frame(
-          Variable = var,
-          Lambda = round(lambda, 4)
-        ))
-        
-        # Create before/after plots
-        p1 <- ggplot(data.frame(x = var_data), aes(x = x)) +
-          geom_histogram(bins = 20, fill = "lightcoral", alpha = 0.7) +
-          labs(title = paste("Before:", var), x = var, y = "Frequency") +
-          theme_minimal()
-        
-        p2 <- ggplot(data.frame(x = transformed_data), aes(x = x)) +
-          geom_histogram(bins = 20, fill = "lightgreen", alpha = 0.7) +
-          labs(title = paste("After:", transform_label), 
-               x = paste("Transformed", var), y = "Frequency") +
-          theme_minimal()
-        
-        # Q-Q plots
-        p3 <- ggplot(data.frame(x = var_data), aes(sample = x)) +
-          stat_qq() + stat_qq_line(color = "red") +
-          labs(title = paste("Q-Q Before:", var)) +
-          theme_minimal()
-        
-        p4 <- ggplot(data.frame(x = transformed_data), aes(sample = x)) +
-          stat_qq() + stat_qq_line(color = "red") +
-          labs(title = paste("Q-Q After:", transform_label)) +
-          theme_minimal()
-        
-        # Combine plots
-        combined_plot <- grid.arrange(p1, p2, p3, p4, ncol = 2,
-                                    top = paste("Box-Cox Transformation for", var))
-        plots_list[[length(plots_list) + 1]] <- combined_plot
-      }
-    }
-    
-    # Display transformation summary
-    if(nrow(transformation_summary) > 0) {
-      kable(transformation_summary, 
-            caption = "Box-Cox Transformation Parameters") %>%
-        kable_styling(latex_options = c("striped", "hold_position"))
-    }
-    
-  } else {
-    cat("All variables appear to be normally distributed. No Box-Cox transformation needed.\n")
-  }
-} else {
-  cat("No numerical variables available for Box-Cox transformation.\n")
-}
-```
-
-# Summary and Conclusions
-
-```{r final-summary}
-cat("## Analysis Summary\n\n")
-cat("Dataset:", deparse(substitute(data)), "\n")
-cat("Total observations:", nrow(data), "\n")
-cat("Total variables:", ncol(data), "\n")
-cat("Numerical variables:", sum(sapply(data, is.numeric)), "\n")
-cat("Categorical variables:", sum(sapply(data, is.factor)), "\n")
-
-if(exists("normality_results") && nrow(normality_results) > 0) {
-  normal_count <- sum(grepl("Yes", normality_results$Normal))
-  cat("Variables following normal distribution:", normal_count, "out of", nrow(normality_results), "\n")
-}
-
-cat("\n## Key Findings:\n")
-cat("- Replace this section with your specific findings\n")
-cat("- Describe patterns observed in the data\n") 
-cat("- Mention any outliers or unusual observations\n")
-cat("- Discuss correlations between variables\n")
-cat("- Summarize transformation results if applicable\n")
-```
