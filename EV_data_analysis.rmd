@@ -35,8 +35,6 @@ library(knitr)          # For nice tables
 library(kableExtra)     # Enhanced table formatting
 library(corrplot)       # Correlation plots
 library(psych)          # Descriptive statistics
-library(car)            # Box-Cox transformation
-library(moments)        # Skewness and kurtosis
 library(gridExtra)      # Arranging plots
 library(ggplot2)        # Advanced plotting
 library(dplyr)          # Data manipulation
@@ -252,7 +250,6 @@ ev_data_2024 <- ev_data %>%
 
 ### Frequency Tables
 
-1.⁠ ⁠Frequency table → Session Status distribution; Day of the week distribution; Weekday vs. Weekend distribution; Location distribution; Charging Start Hours distribution; Charging End Hours distribution
 
 ```{r}
 # 1. Session Status distribution
@@ -358,6 +355,31 @@ ggplot(end_hourly_freq, aes(x = hour_end, y = n)) +
   scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
   labs(title = "Peak Charging End Times", x = "Hour of Day (24h)", y = "Count") +
   theme_minimal()
+
+```
+### Side by side boxplot: 
+
+```{r}
+# 1. Boxplot: Energy Provided by Manufacturer
+ggplot(ev_data, aes(x = reorder(Manufacturer, `Energy Provided (kWh)`, FUN = median), 
+                         y = `Energy Provided (kWh)`, 
+                         fill = Manufacturer)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Energy Provided by Charger Manufacturer",
+       subtitle = "Comparing charging output across different manufacturers",
+       x = "Manufacturer",
+       y = "Energy Provided (kWh)")
+
+
+# 2. Boxplot: Charge Duration by Manufacturer
+ggplot(ev_data, aes(x = reorder(Manufacturer, `Charge Duration (min)`, FUN = median), 
+                         y = `Charge Duration (min)`, 
+                         fill = Manufacturer)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Charge Duration by Charger Manufacturer",
+       subtitle = "Comparing session length across different manufacturers",
+       x = "Manufacturer",
+       y = "Charge Duration (min)")
 ```
 
 
@@ -551,11 +573,9 @@ ggplot(temporal_data, aes(x = hour, y = weekday, fill = total_energy)) +
   theme(panel.grid = element_blank())
 ```
 
-
 #Inferencial Statistics:
 
 ### Weekend vs weekday differences
-
 
 - Two-sample t-tests (or Wilcoxon based on normality) on Charge Duration and Energy Provided:
 - 95% CI for the difference in means.
@@ -694,7 +714,7 @@ ev_data %>%
   head(5) %>%
   print()
 
-# Filter data to top 4 locations
+# Filter data to top 5 locations
 ev_top_locations <- ev_data %>%
   filter(`Location Name` %in% top_locations)
 
@@ -1050,7 +1070,6 @@ ggplot(prop_comparison, aes(x = Location, y = Weekend_Proportion, fill = Locatio
 
 ### Variance/spread comparisons
 
-
 F-test for variance in Energy Provided (kWh) between two groups:
 
 
@@ -1237,6 +1256,70 @@ Correlation test between Charge Duration and Energy Provided.
 Simple linear regression:
 - Energy Provided ~ Charge Duration.
 - Multiple regression adding is_weekend and a few major Location Names.
+
+
+
+```{r}
+### Pearson Correlation Assumption Checks
+
+#-----------------------------------------
+# 2. Check: Linearity (Scatterplot)
+#-----------------------------------------
+cat("===== ASSUMPTION 2: Linearity =====\n")
+cat("Visual inspection via scatterplot\n\n")
+
+ggplot(ev_data, aes(x = `Charge Duration (min)`, y = `Energy Provided (kWh)`)) +
+  geom_point(alpha = 0.2, color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red", linewidth = 1) +
+  geom_smooth(method = "loess", se = TRUE, color = "green", linewidth = 1, linetype = "dashed") +
+  labs(title = "Linearity Check: Charge Duration vs Energy Provided",
+       subtitle = "Red = Linear fit, Green = LOESS (non-linear) fit\nIf both lines are similar, linearity holds",
+       x = "Charge Duration (min)",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+
+#-----------------------------------------
+# 5. Check: Outliers
+#-----------------------------------------
+cat("\n===== ASSUMPTION 5: Outliers =====\n")
+
+# Boxplots for outlier detection
+p3 <- ggplot(ev_data, aes(y = `Charge Duration (min)`)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.7, outlier.color = "red", outlier.alpha = 0.5) +
+  labs(title = "Outliers: Charge Duration",
+       y = "Charge Duration (min)") +
+  theme_minimal()
+
+p4 <- ggplot(ev_data, aes(y = `Energy Provided (kWh)`)) +
+  geom_boxplot(fill = "coral", alpha = 0.7, outlier.color = "red", outlier.alpha = 0.5) +
+  labs(title = "Outliers: Energy Provided",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+grid.arrange(p3, p4, ncol = 2, top = "Outlier Detection")
+
+# Count outliers using IQR method
+count_outliers <- function(x) {
+  Q1 <- quantile(x, 0.25, na.rm = TRUE)
+  Q3 <- quantile(x, 0.75, na.rm = TRUE)
+  IQR <- Q3 - Q1
+  lower <- Q1 - 1.5 * IQR
+  upper <- Q3 + 1.5 * IQR
+  sum(x < lower | x > upper, na.rm = TRUE)
+}
+
+cat("Outliers (IQR method):\n")
+cat("Charge Duration:", count_outliers(ev_data$`Charge Duration (min)`), 
+    "out of", nrow(ev_data), 
+    paste0("(", round(count_outliers(ev_data$`Charge Duration (min)`) / nrow(ev_data) * 100, 2), "%)"), "\n")
+cat("Energy Provided:", count_outliers(ev_data$`Energy Provided (kWh)`), 
+    "out of", nrow(ev_data), 
+    paste0("(", round(count_outliers(ev_data$`Energy Provided (kWh)`) / nrow(ev_data) * 100, 2), "%)"), "\n")
+
+```
+
+
 
 
 ```{r}

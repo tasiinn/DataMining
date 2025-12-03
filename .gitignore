@@ -3,6 +3,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 **/.DS_Store
+.DS_Store
+Data/.DS_Store
 
 
 # Distribution / packaging
@@ -31,3 +33,4 @@ ENV/
 env.bak/
 venv.bak/
 .Rproj.user
+Data/.DS_Store
