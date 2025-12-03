@@ -670,7 +670,6 @@ One-way ANOVA on Energy Provided across, let's say, the top 5 Location Name cate
 
 If ANOVA assumptions fail (from Q–Q plots, boxplots), do Kruskal–Wallis instead.
 
-
 Chi-square test of independence between Location Name and Energy Provided using the contingency table.
 
 
@@ -865,7 +864,7 @@ summary_tests <- data.frame(
 
 
 One-sample proportion CI and test for weekend sessions:
-H0: weekend = 0.3 or some reference value.
+H0: weekend = 0.25 or some reference value.
 Two-sample proportion test: compare weekend usage between two specific locations.
 
 
@@ -1047,5 +1046,476 @@ ggplot(prop_comparison, aes(x = Location, y = Weekend_Proportion, fill = Locatio
 #                ifelse(prop_test_two$p.value < alpha, "Reject H0", "Fail to reject H0"))
 # )
 
+```
+
+### Variance/spread comparisons
+
+
+F-test for variance in Energy Provided (kWh) between two groups:
+
+
+PAID vs ROAMING (Session Status) or weekend vs weekday.
+
+```{r}
+### Variance/Spread Comparisons (F-Test)
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. F-Test: PAID vs ROAMING (Session Status)
+#-----------------------------------------
+
+cat("===== F-TEST FOR VARIANCE: PAID vs ROAMING =====\n")
+cat("H0: σ²_PAID = σ²_ROAMING (Variances are equal)\n")
+cat("Ha: σ²_PAID ≠ σ²_ROAMING (Variances are not equal)\n")
+cat("α =", alpha, "\n\n")
+
+# Filter data for PAID and ROAMING sessions
+paid_data <- ev_data %>% filter(`Session Status` == "PAID")
+roaming_data <- ev_data %>% filter(`Session Status` == "ROAMING")
+
+# Sample statistics
+n_paid <- nrow(paid_data)
+n_roaming <- nrow(roaming_data)
+var_paid <- var(paid_data$`Energy Provided (kWh)`, na.rm = TRUE)
+var_roaming <- var(roaming_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_paid <- sd(paid_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_roaming <- sd(roaming_data$`Energy Provided (kWh)`, na.rm = TRUE)
+
+cat("--- Sample Statistics ---\n")
+cat("PAID Sessions:\n")
+cat("  n =", n_paid, "\n")
+cat("  Variance (s²) =", round(var_paid, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_paid, 4), "kWh\n\n")
+
+cat("ROAMING Sessions:\n")
+cat("  n =", n_roaming, "\n")
+cat("  Variance (s²) =", round(var_roaming, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_roaming, 4), "kWh\n\n")
+
+cat("Variance Ratio (s²_PAID / s²_ROAMING):", round(var_paid / var_roaming, 4), "\n\n")
+
+# F-test
+f_test_status <- var.test(paid_data$`Energy Provided (kWh)`, 
+                           roaming_data$`Energy Provided (kWh)`, 
+                           conf.level = 1 - alpha)
+
+cat("--- F-Test Results ---\n")
+cat("F-statistic:", round(f_test_status$statistic, 4), "\n")
+cat("Degrees of freedom: df1 =", f_test_status$parameter[1], 
+    ", df2 =", f_test_status$parameter[2], "\n")
+cat("p-value:", format(f_test_status$p.value, scientific = TRUE), "\n")
+cat("95% CI for variance ratio:", round(f_test_status$conf.int[1], 4), 
+    "to", round(f_test_status$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(f_test_status$p.value < alpha, 
+                        "Reject H0 - Variances are significantly different", 
+                        "Fail to reject H0 - No significant difference in variances"), "\n")
+
+#-----------------------------------------
+# 2. F-Test: Weekend vs Weekday
+#-----------------------------------------
+
+cat("\n\n===== F-TEST FOR VARIANCE: Weekend vs Weekday =====\n")
+cat("H0: σ²_weekend = σ²_weekday (Variances are equal)\n")
+cat("Ha: σ²_weekend ≠ σ²_weekday (Variances are not equal)\n")
+cat("α =", alpha, "\n\n")
+
+# Filter data
+weekday_data <- ev_data %>% filter(is_weekend == FALSE)
+weekend_data <- ev_data %>% filter(is_weekend == TRUE)
+
+# Sample statistics
+n_weekday <- nrow(weekday_data)
+n_weekend <- nrow(weekend_data)
+var_weekday <- var(weekday_data$`Energy Provided (kWh)`, na.rm = TRUE)
+var_weekend <- var(weekend_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_weekday <- sd(weekday_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_weekend <- sd(weekend_data$`Energy Provided (kWh)`, na.rm = TRUE)
+
+cat("--- Sample Statistics ---\n")
+cat("Weekday Sessions:\n")
+cat("  n =", n_weekday, "\n")
+cat("  Variance (s²) =", round(var_weekday, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_weekday, 4), "kWh\n\n")
+
+cat("Weekend Sessions:\n")
+cat("  n =", n_weekend, "\n")
+cat("  Variance (s²) =", round(var_weekend, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_weekend, 4), "kWh\n\n")
+
+cat("Variance Ratio (s²_weekday / s²_weekend):", round(var_weekday / var_weekend, 4), "\n\n")
+
+# F-test
+f_test_weekend <- var.test(weekday_data$`Energy Provided (kWh)`, 
+                            weekend_data$`Energy Provided (kWh)`, 
+                            conf.level = 1 - alpha)
+
+cat("--- F-Test Results ---\n")
+cat("F-statistic:", round(f_test_weekend$statistic, 4), "\n")
+cat("Degrees of freedom: df1 =", f_test_weekend$parameter[1], 
+    ", df2 =", f_test_weekend$parameter[2], "\n")
+cat("p-value:", format(f_test_weekend$p.value, scientific = TRUE), "\n")
+cat("95% CI for variance ratio:", round(f_test_weekend$conf.int[1], 4), 
+    "to", round(f_test_weekend$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(f_test_weekend$p.value < alpha, 
+                        "Reject H0 - Variances are significantly different", 
+                        "Fail to reject H0 - No significant difference in variances"), "\n")
+
+
+
+ev_paid_roaming <- ev_data %>% filter(`Session Status` %in% c("PAID", "ROAMING"))
+
+#-----------------------------------------
+# 4. Visualization
+#-----------------------------------------
+
+# Boxplot: Energy by Session Status (PAID vs ROAMING)
+p1 <- ggplot(ev_paid_roaming, aes(x = `Session Status`, y = `Energy Provided (kWh)`, 
+                                   fill = `Session Status`)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  stat_summary(fun = var, geom = "text", aes(label = paste("s² =", round(..y.., 1))),
+               vjust = -0.5, size = 3.5) +
+  labs(title = "Energy Provided: PAID vs ROAMING",
+       subtitle = paste("F-test p-value:", format(f_test_status$p.value, scientific = TRUE)),
+       x = "Session Status",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1")
+
+# Boxplot: Energy by Weekend
+p2 <- ggplot(ev_data, aes(x = ifelse(is_weekend, "Weekend", "Weekday"), 
+                           y = `Energy Provided (kWh)`, 
+                           fill = is_weekend)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Energy Provided: Weekend vs Weekday",
+       subtitle = paste("F-test p-value:", format(f_test_weekend$p.value, scientific = TRUE)),
+       x = "Day Type",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+# Display plots side by side
+grid.arrange(p1, p2, ncol = 2)
+
+#-----------------------------------------
+# 5. Summary Table
+#-----------------------------------------
+
+summary_variance <- data.frame(
+  Comparison = c("PAID vs ROAMING", "Weekend vs Weekday"),
+  Group1_Variance = c(round(var_paid, 2), round(var_weekday, 2)),
+  Group2_Variance = c(round(var_roaming, 2), round(var_weekend, 2)),
+  F_statistic = c(round(f_test_status$statistic, 4), round(f_test_weekend$statistic, 4)),
+  df = c(paste(f_test_status$parameter[1], ",", f_test_status$parameter[2]),
+         paste(f_test_weekend$parameter[1], ",", f_test_weekend$parameter[2])),
+  p_value = c(format(f_test_status$p.value, scientific = TRUE),
+              format(f_test_weekend$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(f_test_status$conf.int[1], 3), ", ", 
+                   round(f_test_status$conf.int[2], 3), ")"),
+            paste0("(", round(f_test_weekend$conf.int[1], 3), ", ", 
+                   round(f_test_weekend$conf.int[2], 3), ")")),
+  Decision = c(ifelse(f_test_status$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(f_test_weekend$p.value < alpha, "Reject H0", "Fail to reject H0"))
+)
+
+kable(summary_variance,
+      caption = paste("F-Test for Variance Comparison (α =", alpha, ")"),
+      col.names = c("Comparison", "Variance (Group 1)", "Variance (Group 2)", 
+                    "F-statistic", "df", "p-value", "95% CI", "Decision"),
+      align = "lrrrrrrl") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+
+###Correlation and regression (uses num_data)
+Correlation test between Charge Duration and Energy Provided.
+Simple linear regression:
+- Energy Provided ~ Charge Duration.
+- Multiple regression adding is_weekend and a few major Location Names.
+
+
+```{r}
+### Correlation and Regression Analysis
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. Correlation Test: Charge Duration vs Energy Provided
+#-----------------------------------------
+
+cat("===== CORRELATION TEST =====\n")
+cat("H0: ρ = 0 (No linear correlation)\n")
+cat("Ha: ρ ≠ 0 (Linear correlation exists)\n")
+cat("α =", alpha, "\n\n")
+
+# Pearson correlation test
+cor_test <- cor.test(ev_data$`Charge Duration (min)`, 
+                      ev_data$`Energy Provided (kWh)`, 
+                      method = "pearson",
+                      conf.level = 1 - alpha)
+
+cat("--- Pearson Correlation Test ---\n")
+cat("Correlation coefficient (r):", round(cor_test$estimate, 4), "\n")
+cat("t-statistic:", round(cor_test$statistic, 4), "\n")
+cat("Degrees of freedom:", cor_test$parameter, "\n")
+cat("p-value:", format(cor_test$p.value, scientific = TRUE), "\n")
+cat("95% CI for r:", round(cor_test$conf.int[1], 4), "to", round(cor_test$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(cor_test$p.value < alpha, 
+                        "Reject H0 - Significant correlation exists", 
+                        "Fail to reject H0 - No significant correlation"), "\n")
+
+# Interpretation of correlation strength
+r_value <- abs(cor_test$estimate)
+strength <- case_when(
+  r_value < 0.3 ~ "Weak",
+  r_value < 0.7 ~ "Moderate",
+  TRUE ~ "Strong"
+)
+cat("Correlation strength:", strength, "\n")
+
+# Coefficient of determination
+r_squared <- cor_test$estimate^2
+cat("R² (coefficient of determination):", round(r_squared, 4), 
+    paste0("(", round(r_squared * 100, 2), "% of variance explained)\n"))
+
+# Spearman correlation (non-parametric alternative)
+cor_test_spearman <- cor.test(ev_data$`Charge Duration (min)`, 
+                               ev_data$`Energy Provided (kWh)`, 
+                               method = "spearman")
+
+cat("\n--- Spearman Correlation (Non-parametric) ---\n")
+cat("Correlation coefficient (ρ):", round(cor_test_spearman$estimate, 4), "\n")
+cat("p-value:", format(cor_test_spearman$p.value, scientific = TRUE), "\n")
+
+# Scatterplot with correlation
+ggplot(ev_data, aes(x = `Charge Duration (min)`, y = `Energy Provided (kWh)`)) +
+  geom_point(alpha = 0.3, color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "darkred", linewidth = 1) +
+  annotate("text", 
+           x = max(ev_data$`Charge Duration (min)`, na.rm = TRUE) * 0.75,
+           y = max(ev_data$`Energy Provided (kWh)`, na.rm = TRUE) * 0.95,
+           label = paste0("r = ", round(cor_test$estimate, 3), 
+                          "\np < 0.001"),
+           size = 5, fontface = "bold", color = "darkred") +
+  labs(title = "Correlation: Charge Duration vs Energy Provided",
+       subtitle = paste("95% CI for r: [", round(cor_test$conf.int[1], 3), ", ", 
+                        round(cor_test$conf.int[2], 3), "]", sep = ""),
+       x = "Charge Duration (min)",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+#-----------------------------------------
+# 2. Simple Linear Regression
+#-----------------------------------------
+
+cat("\n\n===== SIMPLE LINEAR REGRESSION =====\n")
+cat("Model: Energy Provided = β0 + β1(Charge Duration) + ε\n\n")
+
+# Fit simple linear regression
+simple_model <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)`, data = ev_data)
+simple_summary <- summary(simple_model)
+
+cat("--- Model Summary ---\n")
+print(simple_summary)
+
+# Extract key statistics
+cat("\n--- Key Statistics ---\n")
+cat("Intercept (β0):", round(coef(simple_model)[1], 4), "\n")
+cat("Slope (β1):", round(coef(simple_model)[2], 4), "\n")
+cat("R²:", round(simple_summary$r.squared, 4), "\n")
+cat("Adjusted R²:", round(simple_summary$adj.r.squared, 4), "\n")
+cat("Residual Std Error:", round(simple_summary$sigma, 4), "\n")
+cat("F-statistic:", round(simple_summary$fstatistic[1], 4), "\n")
+
+# Confidence intervals for coefficients
+cat("\n--- 95% Confidence Intervals for Coefficients ---\n")
+print(confint(simple_model, level = 1 - alpha))
+
+# Interpretation
+cat("\n--- Interpretation ---\n")
+cat("For every 1 minute increase in Charge Duration,\n")
+cat("Energy Provided increases by", round(coef(simple_model)[2], 4), "kWh on average.\n")
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(simple_model)
+par(mfrow = c(1, 1))
+
+#-----------------------------------------
+# 3. Multiple Linear Regression
+#-----------------------------------------
+
+cat("\n\n===== MULTIPLE LINEAR REGRESSION =====\n")
+cat("Model: Energy Provided = β0 + β1(Charge Duration) + β2(is_weekend) + β3(Location) + ε\n\n")
+
+# Prepare data: select top 4 locations for cleaner model
+top_4_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(4) %>%
+  pull(`Location Name`)
+
+ev_regression <- ev_data %>%
+  filter(`Location Name` %in% top_4_locations) %>%
+  mutate(
+    Location = factor(`Location Name`),
+    is_weekend = as.factor(is_weekend)
+  )
+
+cat("Locations included in model:\n")
+print(top_4_locations)
+cat("\nSample size:", nrow(ev_regression), "\n\n")
+
+# Fit multiple regression
+multiple_model <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)` + is_weekend + Location, 
+                      data = ev_regression)
+multiple_summary <- summary(multiple_model)
+
+cat("--- Model Summary ---\n")
+print(multiple_summary)
+
+# Extract key statistics
+cat("\n--- Key Statistics ---\n")
+cat("R²:", round(multiple_summary$r.squared, 4), "\n")
+cat("Adjusted R²:", round(multiple_summary$adj.r.squared, 4), "\n")
+cat("Residual Std Error:", round(multiple_summary$sigma, 4), "\n")
+cat("F-statistic:", round(multiple_summary$fstatistic[1], 4), 
+    "on", multiple_summary$fstatistic[2], "and", multiple_summary$fstatistic[3], "df\n")
+cat("p-value:", format(pf(multiple_summary$fstatistic[1], 
+                          multiple_summary$fstatistic[2], 
+                          multiple_summary$fstatistic[3], 
+                          lower.tail = FALSE), scientific = TRUE), "\n")
+
+# Confidence intervals for coefficients
+cat("\n--- 95% Confidence Intervals for Coefficients ---\n")
+print(confint(multiple_model, level = 1 - alpha))
+
+# ANOVA table for multiple regression
+cat("\n--- ANOVA Table ---\n")
+print(anova(multiple_model))
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(multiple_model)
+par(mfrow = c(1, 1))
+
+#-----------------------------------------
+# 4. Model Comparison
+#-----------------------------------------
+
+cat("\n\n===== MODEL COMPARISON =====\n")
+
+# Compare R² values
+cat("--- R² Comparison ---\n")
+cat("Simple Model R²:", round(simple_summary$r.squared, 4), "\n")
+cat("Multiple Model R²:", round(multiple_summary$r.squared, 4), "\n")
+cat("Improvement:", round((multiple_summary$r.squared - simple_summary$r.squared) * 100, 2), 
+    "percentage points\n")
+
+# Compare adjusted R²
+cat("\n--- Adjusted R² Comparison ---\n")
+cat("Simple Model Adj R²:", round(simple_summary$adj.r.squared, 4), "\n")
+cat("Multiple Model Adj R²:", round(multiple_summary$adj.r.squared, 4), "\n")
+
+# AIC and BIC comparison (need to fit on same data)
+simple_model_subset <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)`, data = ev_regression)
+
+cat("\n--- AIC/BIC Comparison ---\n")
+cat("Simple Model - AIC:", round(AIC(simple_model_subset), 2), 
+    ", BIC:", round(BIC(simple_model_subset), 2), "\n")
+cat("Multiple Model - AIC:", round(AIC(multiple_model), 2), 
+    ", BIC:", round(BIC(multiple_model), 2), "\n")
+cat("Lower values indicate better fit\n")
+
+#-----------------------------------------
+# 5. Coefficient Visualization
+#-----------------------------------------
+
+# Extract coefficients for visualization
+coef_df <- data.frame(
+  Term = names(coef(multiple_model)),
+  Estimate = coef(multiple_model),
+  CI_lower = confint(multiple_model)[, 1],
+  CI_upper = confint(multiple_model)[, 2]
+) %>%
+  filter(Term != "(Intercept)")  # Remove intercept for cleaner plot
+
+# Coefficient plot
+ggplot(coef_df, aes(x = reorder(Term, Estimate), y = Estimate)) +
+  geom_point(size = 3, color = "steelblue") +
+  geom_errorbar(aes(ymin = CI_lower, ymax = CI_upper), width = 0.2, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  coord_flip() +
+  labs(title = "Multiple Regression Coefficients",
+       subtitle = "With 95% Confidence Intervals",
+       x = "Predictor",
+       y = "Coefficient Estimate") +
+  theme_minimal()
+
+#-----------------------------------------
+# 6. Summary Tables
+#-----------------------------------------
+
+# Correlation summary
+correlation_summary <- data.frame(
+  Method = c("Pearson", "Spearman"),
+  Coefficient = c(round(cor_test$estimate, 4), round(cor_test_spearman$estimate, 4)),
+  p_value = c(format(cor_test$p.value, scientific = TRUE), 
+              format(cor_test_spearman$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(cor_test$conf.int[1], 4), ", ", 
+                   round(cor_test$conf.int[2], 4), ")"), "N/A"),
+  Decision = c(ifelse(cor_test$p.value < alpha, "Significant", "Not Significant"),
+               ifelse(cor_test_spearman$p.value < alpha, "Significant", "Not Significant"))
+)
+
+kable(correlation_summary,
+      caption = paste("Correlation Test Summary (α =", alpha, ")"),
+      col.names = c("Method", "Coefficient", "p-value", "95% CI", "Decision"),
+      align = "lrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+# Regression model comparison
+model_comparison <- data.frame(
+  Model = c("Simple (Duration only)", "Multiple (Duration + Weekend + Location)"),
+  R_squared = c(round(simple_summary$r.squared, 4), round(multiple_summary$r.squared, 4)),
+  Adj_R_squared = c(round(simple_summary$adj.r.squared, 4), round(multiple_summary$adj.r.squared, 4)),
+  RSE = c(round(simple_summary$sigma, 4), round(multiple_summary$sigma, 4)),
+  AIC = c(round(AIC(simple_model_subset), 2), round(AIC(multiple_model), 2)),
+  BIC = c(round(BIC(simple_model_subset), 2), round(BIC(multiple_model), 2))
+)
+
+kable(model_comparison,
+      caption = "Regression Model Comparison",
+      col.names = c("Model", "R²", "Adj R²", "Residual SE", "AIC", "BIC"),
+      align = "lrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+# Multiple regression coefficients table
+coef_table <- data.frame(
+  Term = rownames(summary(multiple_model)$coefficients),
+  Estimate = round(summary(multiple_model)$coefficients[, 1], 4),
+  Std_Error = round(summary(multiple_model)$coefficients[, 2], 4),
+  t_value = round(summary(multiple_model)$coefficients[, 3], 4),
+  p_value = format(summary(multiple_model)$coefficients[, 4], scientific = TRUE),
+  Significant = ifelse(summary(multiple_model)$coefficients[, 4] < alpha, "Yes", "No")
+)
+
+kable(coef_table,
+      caption = paste("Multiple Regression Coefficients (α =", alpha, ")"),
+      col.names = c("Term", "Estimate", "Std Error", "t-value", "p-value", "Significant?"),
+      align = "lrrrrr",
+      row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
 ```
 
