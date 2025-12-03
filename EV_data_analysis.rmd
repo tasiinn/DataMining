@@ -1,6 +1,6 @@
 ---
 title: "DSCC/CSC/TCS 462 Project"
-author: "Group 3 "
+author: "Group 3"
 date: "`r Sys.Date()`"
 output: 
   pdf_document:
@@ -52,7 +52,7 @@ In this step, we want to:
 ev_data <- read.csv("Data/EV_Charging/EV_Charging_Data-_Municipal_Lots_and_Garages_20251106.csv", stringsAsFactors = FALSE, check.names = FALSE)
 ```
 
-2. Choose ID tag as an unique identifier:
+2. Choose ID tag as an unique identifier: (still need to consider this decision)
 ```{r}
 
 # Choose ID_tag as unique identifier
@@ -64,7 +64,7 @@ ev_data <- ev_data %>%
 
 ```
 
-3. Remove Columns and rows that are not relevent to our experiment:
+3. Remove Columns and rows that are not relevant to our experiment:
 ```{r}
 # Remove columns: Driver_id, Invalidity_reason, country
 ev_data <- ev_data %>%
@@ -194,6 +194,40 @@ ev_data %>% count(`Location Name`, sort = TRUE)
 
 ```
 
+7.Add EV charging box brand (manufacturer) as column:
+
+```{r}
+# Add Manufacturer column based on Station Name patterns
+ev_data <- ev_data %>%
+  mutate(
+    Manufacturer = case_when(
+      # BTCE followed by four digits - BTC Power
+      grepl("^BTCE\\d{4}", `Station Name`) ~ "BTC Power",
+      
+      # EVB followed by four digits - EVB
+      grepl("^EVB\\d{4}", `Station Name`) ~ "EVB",
+      
+      # EVX1420 or EVX1420z - EVX
+      grepl("^EVX1420", `Station Name`) ~ "EVX",
+      
+      # EV followed by four digits (but not EVB or EVX) - Fast Charger
+      grepl("^EV\\d{4}", `Station Name`) ~ "Fast Charger (Multiple)",
+      
+      # Six digit numbers - Unknown
+      grepl("^\\d{6}$", `Station Name`) ~ "Unknown",
+      
+      # DELETED - Deleted
+      grepl("DELETED", `Station Name`, ignore.case = TRUE) ~ "Deleted",
+      
+      # Anything else
+      TRUE ~ "Other"
+    )
+  )
+
+
+
+```
+
 7. Data info:
 
 ```{r}
@@ -204,6 +238,12 @@ cat("Column names:\n")
 cat(paste(1:length(names(ev_data)), names(ev_data), sep = ". "), sep = "\n")
 
 write.csv(ev_data, "EV_data_processed.csv", row.names = FALSE)
+```
+8. Filter Dataframe by date: year 2024
+
+```{r}
+ev_data_2024 <- ev_data %>%
+  filter(Date >= as.Date("2024-01-01") & Date <= as.Date("2024-12-31"))
 ```
 
 
@@ -511,7 +551,1206 @@ ggplot(temporal_data, aes(x = hour, y = weekday, fill = total_energy)) +
 ```
 
 
-
-
 #Inferencial Statistics:
+
+### Weekend vs weekday differences
+
+
+- Two-sample t-tests (or Wilcoxon based on normality) on Charge Duration and Energy Provided:
+
+
+- H0: Mean of Weekend = Mean of Weekdays.
+
+
+- 95% CI for the difference in means.
+
+
+- Have to check for normality (or lack of it) using the histograms + Q–Q plots from desc stats.
+
+```{r}
+### Weekend vs Weekday Differences
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+# Separate data into weekend and weekday groups
+weekday_data <- ev_data %>% filter(is_weekend == FALSE)
+weekend_data <- ev_data %>% filter(is_weekend == TRUE)
+
+# Display sample sizes
+cat("Sample Sizes:\n")
+cat("Weekday sessions:", nrow(weekday_data), "\n")
+cat("Weekend sessions:", nrow(weekend_data), "\n")
+cat("Significance Level: α =", alpha, "\n")
+
+#-----------------------------------------
+# 1. Normality Check: Histograms
+#-----------------------------------------
+
+# Histogram: Energy Provided by Weekend vs Weekday
+ggplot(ev_data, aes(x = `Energy Provided (kWh)`, fill = is_weekend)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  facet_wrap(~ ifelse(is_weekend, "Weekend", "Weekday"), scales = "free_y") +
+  labs(title = "Distribution of Energy Provided: Weekday vs Weekend",
+       x = "Energy Provided (kWh)",
+       y = "Count") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+# Histogram: Charge Duration by Weekend vs Weekday
+ggplot(ev_data, aes(x = `Charge Duration (min)`, fill = is_weekend)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  facet_wrap(~ ifelse(is_weekend, "Weekend", "Weekday"), scales = "free_y") +
+  labs(title = "Distribution of Charge Duration: Weekday vs Weekend",
+       x = "Charge Duration (min)",
+       y = "Count") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+#-----------------------------------------
+# 2. Normality Check: Q-Q Plots
+#-----------------------------------------
+
+# Q-Q Plot: Energy Provided - Weekday
+qqPlot(weekday_data$`Energy Provided (kWh)`, 
+       main = "Q-Q Plot: Energy Provided (Weekday)",
+       ylab = "Energy Provided (kWh)")
+
+# Q-Q Plot: Energy Provided - Weekend
+qqPlot(weekend_data$`Energy Provided (kWh)`, 
+       main = "Q-Q Plot: Energy Provided (Weekend)",
+       ylab = "Energy Provided (kWh)")
+
+# Q-Q Plot: Charge Duration - Weekday
+qqPlot(weekday_data$`Charge Duration (min)`, 
+       main = "Q-Q Plot: Charge Duration (Weekday)",
+       ylab = "Charge Duration (min)")
+
+# Q-Q Plot: Charge Duration - Weekend
+qqPlot(weekend_data$`Charge Duration (min)`, 
+       main = "Q-Q Plot: Charge Duration (Weekend)",
+       ylab = "Charge Duration (min)")
+
+#-----------------------------------------
+# 3. Formal Normality Test (Shapiro-Wilk)
+#-----------------------------------------
+# Note: Shapiro-Wilk limited to 5000 observations, so we sample
+
+set.seed(123)
+shapiro_weekday_energy <- shapiro.test(sample(weekday_data$`Energy Provided (kWh)`, 5000))
+shapiro_weekend_energy <- shapiro.test(sample(weekend_data$`Energy Provided (kWh)`, 
+                                               min(5000, nrow(weekend_data))))
+shapiro_weekday_duration <- shapiro.test(sample(weekday_data$`Charge Duration (min)`, 5000))
+shapiro_weekend_duration <- shapiro.test(sample(weekend_data$`Charge Duration (min)`, 
+                                                 min(5000, nrow(weekend_data))))
+
+cat("\n--- Shapiro-Wilk Normality Tests (α =", alpha, ") ---\n")
+cat("H0: Data is normally distributed\n")
+cat("Ha: Data is not normally distributed\n\n")
+
+cat("Energy (Weekday): W =", round(shapiro_weekday_energy$statistic, 4), 
+    ", p-value =", format(shapiro_weekday_energy$p.value, scientific = TRUE),
+    "→", ifelse(shapiro_weekday_energy$p.value < alpha, "Reject H0 (Non-normal)", "Fail to reject H0"), "\n")
+cat("Energy (Weekend): W =", round(shapiro_weekend_energy$statistic, 4), 
+    ", p-value =", format(shapiro_weekend_energy$p.value, scientific = TRUE),
+    "→", ifelse(shapiro_weekend_energy$p.value < alpha, "Reject H0 (Non-normal)", "Fail to reject H0"), "\n")
+cat("Duration (Weekday): W =", round(shapiro_weekday_duration$statistic, 4), 
+    ", p-value =", format(shapiro_weekday_duration$p.value, scientific = TRUE),
+    "→", ifelse(shapiro_weekday_duration$p.value < alpha, "Reject H0 (Non-normal)", "Fail to reject H0"), "\n")
+cat("Duration (Weekend): W =", round(shapiro_weekend_duration$statistic, 4), 
+    ", p-value =", format(shapiro_weekend_duration$p.value, scientific = TRUE),
+    "→", ifelse(shapiro_weekend_duration$p.value < alpha, "Reject H0 (Non-normal)", "Fail to reject H0"), "\n")
+
+#-----------------------------------------
+# 4. Hypothesis Tests for Energy Provided
+#-----------------------------------------
+
+cat("\n===== ENERGY PROVIDED: Weekend vs Weekday =====\n")
+cat("H0: μ_weekday = μ_weekend (No difference in mean energy)\n")
+cat("Ha: μ_weekday ≠ μ_weekend (Difference exists)\n")
+cat("α =", alpha, "\n")
+
+# Descriptive comparison
+cat("\nDescriptive Statistics:\n")
+cat("Weekday - Mean:", round(mean(weekday_data$`Energy Provided (kWh)`), 3), 
+    "kWh, Median:", round(median(weekday_data$`Energy Provided (kWh)`), 3), "kWh\n")
+cat("Weekend - Mean:", round(mean(weekend_data$`Energy Provided (kWh)`), 3), 
+    "kWh, Median:", round(median(weekend_data$`Energy Provided (kWh)`), 3), "kWh\n")
+
+# Two-sample t-test (Welch's t-test)
+t_test_energy <- t.test(`Energy Provided (kWh)` ~ is_weekend, data = ev_data, 
+                         conf.level = 1 - alpha)
+cat("\n--- Two-Sample t-Test (Welch) ---\n")
+cat("t-statistic:", round(t_test_energy$statistic, 4), "\n")
+cat("Degrees of freedom:", round(t_test_energy$parameter, 2), "\n")
+cat("p-value:", format(t_test_energy$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference (Weekday - Weekend):", 
+    round(t_test_energy$conf.int[1], 3), "to", round(t_test_energy$conf.int[2], 3), "kWh\n")
+cat("Decision:", ifelse(t_test_energy$p.value < alpha, 
+                        "Reject H0 - Significant difference exists", 
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+# Wilcoxon rank-sum test (non-parametric alternative)
+wilcox_energy <- wilcox.test(`Energy Provided (kWh)` ~ is_weekend, data = ev_data, 
+                              conf.int = TRUE, conf.level = 1 - alpha)
+cat("\n--- Wilcoxon Rank-Sum Test (Non-parametric) ---\n")
+cat("W statistic:", wilcox_energy$statistic, "\n")
+cat("p-value:", format(wilcox_energy$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference:", round(wilcox_energy$conf.int[1], 3), "to", 
+    round(wilcox_energy$conf.int[2], 3), "kWh\n")
+cat("Decision:", ifelse(wilcox_energy$p.value < alpha, 
+                        "Reject H0 - Significant difference exists", 
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+#-----------------------------------------
+# 5. Hypothesis Tests for Charge Duration
+#-----------------------------------------
+
+cat("\n===== CHARGE DURATION: Weekend vs Weekday =====\n")
+cat("H0: μ_weekday = μ_weekend (No difference in mean duration)\n")
+cat("Ha: μ_weekday ≠ μ_weekend (Difference exists)\n")
+cat("α =", alpha, "\n")
+
+# Descriptive comparison
+cat("\nDescriptive Statistics:\n")
+cat("Weekday - Mean:", round(mean(weekday_data$`Charge Duration (min)`), 3), 
+    "min, Median:", round(median(weekday_data$`Charge Duration (min)`), 3), "min\n")
+cat("Weekend - Mean:", round(mean(weekend_data$`Charge Duration (min)`), 3), 
+    "min, Median:", round(median(weekend_data$`Charge Duration (min)`), 3), "min\n")
+
+# Two-sample t-test
+t_test_duration <- t.test(`Charge Duration (min)` ~ is_weekend, data = ev_data, 
+                           conf.level = 1 - alpha)
+cat("\n--- Two-Sample t-Test (Welch) ---\n")
+cat("t-statistic:", round(t_test_duration$statistic, 4), "\n")
+cat("Degrees of freedom:", round(t_test_duration$parameter, 2), "\n")
+cat("p-value:", format(t_test_duration$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference (Weekday - Weekend):", 
+    round(t_test_duration$conf.int[1], 3), "to", round(t_test_duration$conf.int[2], 3), "min\n")
+cat("Decision:", ifelse(t_test_duration$p.value < alpha, 
+                        "Reject H0 - Significant difference exists", 
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+# Wilcoxon rank-sum test
+wilcox_duration <- wilcox.test(`Charge Duration (min)` ~ is_weekend, data = ev_data, 
+                                conf.int = TRUE, conf.level = 1 - alpha)
+cat("\n--- Wilcoxon Rank-Sum Test (Non-parametric) ---\n")
+cat("W statistic:", wilcox_duration$statistic, "\n")
+cat("p-value:", format(wilcox_duration$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference:", round(wilcox_duration$conf.int[1], 3), "to", 
+    round(wilcox_duration$conf.int[2], 3), "min\n")
+cat("Decision:", ifelse(wilcox_duration$p.value < alpha, 
+                        "Reject H0 - Significant difference exists", 
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+#-----------------------------------------
+# 6. Summary Table
+#-----------------------------------------
+results_summary <- data.frame(
+  Variable = c("Energy Provided (kWh)", "Charge Duration (min)"),
+  Weekday_Mean = c(round(mean(weekday_data$`Energy Provided (kWh)`), 2),
+                   round(mean(weekday_data$`Charge Duration (min)`), 2)),
+  Weekend_Mean = c(round(mean(weekend_data$`Energy Provided (kWh)`), 2),
+                   round(mean(weekend_data$`Charge Duration (min)`), 2)),
+  t_statistic = c(round(t_test_energy$statistic, 3), round(t_test_duration$statistic, 3)),
+  p_value = c(format(t_test_energy$p.value, scientific = TRUE), 
+              format(t_test_duration$p.value, scientific = TRUE)),
+  CI_lower = c(round(t_test_energy$conf.int[1], 3), round(t_test_duration$conf.int[1], 3)),
+  CI_upper = c(round(t_test_energy$conf.int[2], 3), round(t_test_duration$conf.int[2], 3)),
+  Decision = c(ifelse(t_test_energy$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(t_test_duration$p.value < alpha, "Reject H0", "Fail to reject H0"))
+)
+
+kable(results_summary,
+      caption = paste("Weekend vs Weekday Comparison: Two-Sample t-Test Results (α =", alpha, ")"),
+      col.names = c("Variable", "Weekday Mean", "Weekend Mean", "t-statistic", 
+                    "p-value", "95% CI Lower", "95% CI Upper", "Decision"),
+      align = "lrrrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+
+Location differences
+
+
+One-way ANOVA on Energy Provided across, let's say, the top 3–4 Location Name categories in the frequency table.
+
+
+If ANOVA assumptions fail (from Q–Q plots, boxplots), do Kruskal–Wallis instead.
+
+
+Chi-square test of independence between Location Name and Energy Provided using the contingency table.
+
+
+```{r}
+### Location Differences Analysis
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. Select Top 4 Locations by Frequency
+#-----------------------------------------
+
+top_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(4) %>%
+  pull(`Location Name`)
+
+cat("Top 4 Locations by Number of Sessions:\n")
+ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(4) %>%
+  print()
+
+# Filter data to top 4 locations
+ev_top_locations <- ev_data %>%
+  filter(`Location Name` %in% top_locations)
+
+cat("\nFiltered dataset size:", nrow(ev_top_locations), "sessions\n")
+
+#-----------------------------------------
+# 2. Descriptive Statistics by Location
+#-----------------------------------------
+
+location_summary <- ev_top_locations %>%
+  group_by(`Location Name`) %>%
+  summarise(
+    n = n(),
+    Mean = round(mean(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    Median = round(median(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    SD = round(sd(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    Variance = round(var(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    .groups = "drop"
+  )
+
+kable(location_summary,
+      caption = "Energy Provided (kWh) by Location - Descriptive Statistics",
+      col.names = c("Location", "n", "Mean", "Median", "Std Dev", "Variance"),
+      align = "lrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+#-----------------------------------------
+# 3. ANOVA Assumption Checks
+#-----------------------------------------
+
+cat("\n===== ANOVA ASSUMPTION CHECKS =====\n")
+
+# 3a. Boxplots - Visual check for outliers and distribution
+ggplot(ev_top_locations, aes(x = `Location Name`, y = `Energy Provided (kWh)`, 
+                              fill = `Location Name`)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  coord_flip() +
+  labs(title = "Energy Provided by Location (Top 4)",
+       subtitle = "Visual check for ANOVA assumptions",
+       x = "Location",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set2")
+
+# 3b. Q-Q Plots for each location
+par(mfrow = c(2, 2))
+for (loc in top_locations) {
+  loc_data <- ev_top_locations %>%
+    filter(`Location Name` == loc) %>%
+    pull(`Energy Provided (kWh)`)
+  
+  qqnorm(loc_data, main = paste("Q-Q Plot:", substr(loc, 1, 25)))
+  qqline(loc_data, col = "red", lwd = 2)
+}
+par(mfrow = c(1, 1))
+
+# 3c. Shapiro-Wilk Test for Normality (sample due to size limit)
+cat("\n--- Shapiro-Wilk Normality Tests (α =", alpha, ") ---\n")
+cat("H0: Data is normally distributed\n")
+cat("Ha: Data is not normally distributed\n\n")
+
+set.seed(123)
+for (loc in top_locations) {
+  loc_data <- ev_top_locations %>%
+    filter(`Location Name` == loc) %>%
+    pull(`Energy Provided (kWh)`)
+  
+  sample_size <- min(5000, length(loc_data))
+  shapiro_result <- shapiro.test(sample(loc_data, sample_size))
+  
+  cat(substr(loc, 1, 40), ":\n")
+  cat("  W =", round(shapiro_result$statistic, 4), 
+      ", p-value =", format(shapiro_result$p.value, scientific = TRUE),
+      "→", ifelse(shapiro_result$p.value < alpha, "Non-normal", "Normal"), "\n")
+}
+
+# 3d. Levene's Test for Homogeneity of Variances
+cat("\n--- Levene's Test for Homogeneity of Variances ---\n")
+cat("H0: Variances are equal across groups\n")
+cat("Ha: Variances are not equal\n\n")
+
+levene_result <- leveneTest(`Energy Provided (kWh)` ~ `Location Name`, data = ev_top_locations)
+cat("F-statistic:", round(levene_result$`F value`[1], 4), "\n")
+cat("p-value:", format(levene_result$`Pr(>F)`[1], scientific = TRUE), "\n")
+cat("Decision:", ifelse(levene_result$`Pr(>F)`[1] < alpha, 
+                        "Reject H0 - Variances are NOT equal", 
+                        "Fail to reject H0 - Variances are equal"), "\n")
+
+#-----------------------------------------
+# 4. One-Way ANOVA
+#-----------------------------------------
+
+cat("\n===== ONE-WAY ANOVA =====\n")
+cat("H0: μ1 = μ2 = μ3 = μ4 (All location means are equal)\n")
+cat("Ha: At least one mean is different\n")
+cat("α =", alpha, "\n\n")
+
+# Fix: Create a clean column name for ANOVA
+ev_top_locations <- ev_top_locations %>%
+  mutate(Location = `Location Name`)
+
+# Run ANOVA with clean column name
+anova_model <- aov(`Energy Provided (kWh)` ~ Location, data = ev_top_locations)
+anova_result <- summary(anova_model)
+
+print(anova_result)
+
+# Extract F-statistic and p-value
+f_stat <- anova_result[[1]]$`F value`[1]
+p_value_anova <- anova_result[[1]]$`Pr(>F)`[1]
+
+cat("\nF-statistic:", round(f_stat, 4), "\n")
+cat("p-value:", format(p_value_anova, scientific = TRUE), "\n")
+cat("Decision:", ifelse(p_value_anova < alpha, 
+                        "Reject H0 - Significant difference exists between locations", 
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+# Post-hoc Tukey HSD (now works with clean column name)
+if (p_value_anova < alpha) {
+  cat("\n--- Tukey HSD Post-Hoc Test ---\n")
+  tukey_result <- TukeyHSD(anova_model, conf.level = 1 - alpha)
+  print(tukey_result)
+  
+  # Visualize Tukey results
+  plot(tukey_result, las = 1, cex.axis = 0.5)
+}
+
+#-----------------------------------------
+# 5. Kruskal-Wallis Test (Non-parametric alternative)
+#-----------------------------------------
+
+cat("\n===== KRUSKAL-WALLIS TEST (Non-parametric) =====\n")
+cat("H0: All location distributions are equal\n")
+cat("Ha: At least one distribution is different\n")
+cat("α =", alpha, "\n\n")
+
+kruskal_result <- kruskal.test(`Energy Provided (kWh)` ~ `Location Name`, data = ev_top_locations)
+
+cat("Chi-squared statistic:", round(kruskal_result$statistic, 4), "\n")
+cat("Degrees of freedom:", kruskal_result$parameter, "\n")
+cat("p-value:", format(kruskal_result$p.value, scientific = TRUE), "\n")
+cat("Decision:", ifelse(kruskal_result$p.value < alpha, 
+                        "Reject H0 - Significant difference exists between locations", 
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+# Post-hoc Dunn Test (if Kruskal-Wallis is significant)
+if (kruskal_result$p.value < alpha) {
+  cat("\n--- Dunn's Post-Hoc Test (Bonferroni adjustment) ---\n")
+  # Need to install FSA package for dunnTest
+  if (!require(FSA)) install.packages("FSA", quiet = TRUE)
+  library(FSA)
+  dunn_result <- dunnTest(`Energy Provided (kWh)` ~ `Location Name`, 
+                           data = ev_top_locations, method = "bonferroni")
+  print(dunn_result)
+}
+
+#-----------------------------------------
+# 6. Chi-Square Test of Independence
+#-----------------------------------------
+
+cat("\n===== CHI-SQUARE TEST OF INDEPENDENCE =====\n")
+cat("H0: Location and Energy Category are independent\n")
+cat("Ha: Location and Energy Category are dependent\n")
+cat("α =", alpha, "\n\n")
+
+# Create energy categories for contingency table
+ev_top_locations <- ev_top_locations %>%
+  mutate(
+    Energy_Category = cut(`Energy Provided (kWh)`,
+                          breaks = c(-Inf, 10, 25, 50, Inf),
+                          labels = c("Low (0-10)", "Medium (10-25)", 
+                                     "High (25-50)", "Very High (50+)"))
+  )
+
+# Create contingency table
+contingency_table <- table(ev_top_locations$`Location Name`, 
+                           ev_top_locations$Energy_Category)
+
+cat("Contingency Table:\n")
+print(contingency_table)
+
+# Visualize contingency table
+contingency_df <- as.data.frame(contingency_table)
+names(contingency_df) <- c("Location", "Energy_Category", "Count")
+
+ggplot(contingency_df, aes(x = Energy_Category, y = Location, fill = Count)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = Count), size = 4) +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
+  labs(title = "Contingency Table: Location vs Energy Category",
+       x = "Energy Category",
+       y = "Location") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Chi-square test
+chi_sq_result <- chisq.test(contingency_table)
+
+cat("\n--- Chi-Square Test Results ---\n")
+cat("Chi-squared statistic:", round(chi_sq_result$statistic, 4), "\n")
+cat("Degrees of freedom:", chi_sq_result$parameter, "\n")
+cat("p-value:", format(chi_sq_result$p.value, scientific = TRUE), "\n")
+cat("Decision:", ifelse(chi_sq_result$p.value < alpha, 
+                        "Reject H0 - Location and Energy Category are DEPENDENT", 
+                        "Fail to reject H0 - Location and Energy Category are independent"), "\n")
+
+# Expected frequencies (check assumption: all expected counts > 5)
+cat("\nExpected Frequencies:\n")
+print(round(chi_sq_result$expected, 2))
+
+cat("\nAssumption Check: All expected frequencies > 5?\n")
+cat(ifelse(all(chi_sq_result$expected >= 5), "Yes - Assumption met", 
+           "No - Consider Fisher's exact test or combine categories"), "\n")
+
+#-----------------------------------------
+# 7. Summary Table
+#-----------------------------------------
+
+summary_tests <- data.frame(
+  Test = c("One-Way ANOVA", "Kruskal-Wallis", "Chi-Square Independence"),
+  Statistic = c(paste("F =", round(f_stat, 3)),
+                paste("χ² =", round(kruskal_result$statistic, 3)),
+                paste("χ² =", round(chi_sq_result$statistic, 3))),
+  df = c(paste(anova_result[[1]]$Df[1], "and", anova_result[[1]]$Df[2]),
+         kruskal_result$parameter,
+         chi_sq_result$parameter),
+  p_value = c(format(p_value_anova, scientific = TRUE),
+              format(kruskal_result$p.value, scientific = TRUE),
+              format(chi_sq_result$p.value, scientific = TRUE)),
+  Decision = c(ifelse(p_value_anova < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(kruskal_result$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(chi_sq_result$p.value < alpha, "Reject H0", "Fail to reject H0"))
+)
+
+kable(summary_tests,
+      caption = paste("Location Differences Analysis Summary (α =", alpha, ")"),
+      col.names = c("Test", "Test Statistic", "df", "p-value", "Decision"),
+      align = "llrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+Proportion inference
+
+
+One-sample proportion CI and test for weekend sessions:
+
+
+H0: weekend = 0.3 or some reference value.
+
+
+Two-sample proportion test: compare weekend usage between two specific locations.
+
+
+```{r}
+### Proportion Inference
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. One-Sample Proportion: Weekend Sessions
+#-----------------------------------------
+
+cat("===== ONE-SAMPLE PROPORTION TEST: Weekend Sessions =====\n")
+cat("H0: p_weekend = 0.30 (30% of sessions are on weekends)\n")
+cat("Ha: p_weekend ≠ 0.30\n")
+cat("α =", alpha, "\n\n")
+
+# Calculate observed proportion
+n_total <- nrow(ev_data)
+n_weekend <- sum(ev_data$is_weekend == TRUE)
+p_observed <- n_weekend / n_total
+
+cat("--- Sample Statistics ---\n")
+cat("Total sessions:", n_total, "\n")
+cat("Weekend sessions:", n_weekend, "\n")
+cat("Observed proportion (p̂):", round(p_observed, 4), "\n")
+cat("Expected proportion (p0): 0.30\n\n")
+
+# One-sample proportion test
+p0 <- 0.30  # Hypothesized proportion
+prop_test_one <- prop.test(n_weekend, n_total, p = p0, 
+                            conf.level = 1 - alpha, 
+                            correct = FALSE)  # Without Yates continuity correction
+
+cat("--- One-Sample z-Test for Proportion ---\n")
+cat("Chi-squared statistic:", round(prop_test_one$statistic, 4), "\n")
+cat("p-value:", format(prop_test_one$p.value, scientific = TRUE), "\n")
+cat("95% Confidence Interval for p_weekend:", 
+    round(prop_test_one$conf.int[1], 4), "to", round(prop_test_one$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(prop_test_one$p.value < alpha, 
+                        "Reject H0 - Weekend proportion differs from 0.30", 
+                        "Fail to reject H0 - No evidence weekend proportion differs from 0.30"), "\n")
+
+# Manual z-test calculation for clarity
+z_stat <- (p_observed - p0) / sqrt(p0 * (1 - p0) / n_total)
+p_value_z <- 2 * pnorm(-abs(z_stat))  # Two-tailed
+
+cat("\n--- Manual z-Test Calculation ---\n")
+cat("z-statistic:", round(z_stat, 4), "\n")
+cat("p-value (two-tailed):", format(p_value_z, scientific = TRUE), "\n")
+
+# Wilson confidence interval (more accurate for proportions)
+cat("\n--- Wilson 95% Confidence Interval ---\n")
+wilson_ci <- prop.test(n_weekend, n_total, conf.level = 1 - alpha, correct = FALSE)$conf.int
+cat("95% CI:", round(wilson_ci[1], 4), "to", round(wilson_ci[2], 4), "\n")
+
+#-----------------------------------------
+# 2. Two-Sample Proportion: Weekend Usage by Location
+#-----------------------------------------
+
+cat("\n\n===== TWO-SAMPLE PROPORTION TEST: Weekend Usage by Location =====\n")
+
+# Select two locations for comparison (top 2 by frequency)
+top_2_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(2) %>%
+  pull(`Location Name`)
+
+cat("Comparing locations:\n")
+cat("  Location 1:", top_2_locations[1], "\n")
+cat("  Location 2:", top_2_locations[2], "\n\n")
+
+# Filter data for these two locations
+loc1_data <- ev_data %>% filter(`Location Name` == top_2_locations[1])
+loc2_data <- ev_data %>% filter(`Location Name` == top_2_locations[2])
+
+# Calculate proportions
+n1 <- nrow(loc1_data)
+n2 <- nrow(loc2_data)
+x1 <- sum(loc1_data$is_weekend == TRUE)
+x2 <- sum(loc2_data$is_weekend == TRUE)
+p1 <- x1 / n1
+p2 <- x2 / n2
+
+cat("--- Sample Statistics ---\n")
+cat("Location 1 -", top_2_locations[1], ":\n")
+cat("  Total sessions:", n1, "\n")
+cat("  Weekend sessions:", x1, "\n")
+cat("  Proportion weekend (p̂1):", round(p1, 4), "\n\n")
+
+cat("Location 2 -", top_2_locations[2], ":\n")
+cat("  Total sessions:", n2, "\n")
+cat("  Weekend sessions:", x2, "\n")
+cat("  Proportion weekend (p̂2):", round(p2, 4), "\n\n")
+
+cat("Difference (p̂1 - p̂2):", round(p1 - p2, 4), "\n\n")
+
+# Hypothesis test
+cat("H0: p1 = p2 (Weekend proportion is equal at both locations)\n")
+cat("Ha: p1 ≠ p2 (Weekend proportions differ)\n")
+cat("α =", alpha, "\n\n")
+
+# Two-sample proportion test
+prop_test_two <- prop.test(c(x1, x2), c(n1, n2), 
+                            conf.level = 1 - alpha, 
+                            correct = FALSE)
+
+cat("--- Two-Sample z-Test for Proportions ---\n")
+cat("Chi-squared statistic:", round(prop_test_two$statistic, 4), "\n")
+cat("p-value:", format(prop_test_two$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference (p1 - p2):", 
+    round(prop_test_two$conf.int[1], 4), "to", round(prop_test_two$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(prop_test_two$p.value < alpha, 
+                        "Reject H0 - Weekend proportions differ between locations", 
+                        "Fail to reject H0 - No significant difference in weekend proportions"), "\n")
+
+# Manual z-test calculation
+p_pooled <- (x1 + x2) / (n1 + n2)
+se_pooled <- sqrt(p_pooled * (1 - p_pooled) * (1/n1 + 1/n2))
+z_stat_two <- (p1 - p2) / se_pooled
+p_value_z_two <- 2 * pnorm(-abs(z_stat_two))
+
+cat("\n--- Manual z-Test Calculation ---\n")
+cat("Pooled proportion:", round(p_pooled, 4), "\n")
+cat("Standard error:", round(se_pooled, 4), "\n")
+cat("z-statistic:", round(z_stat_two, 4), "\n")
+cat("p-value (two-tailed):", format(p_value_z_two, scientific = TRUE), "\n")
+
+#-----------------------------------------
+# 3. Visualization
+#-----------------------------------------
+
+# Bar plot comparing weekend proportions by location
+prop_comparison <- data.frame(
+  Location = c(top_2_locations[1], top_2_locations[2]),
+  Weekend_Proportion = c(p1, p2),
+  Weekend_Count = c(x1, x2),
+  Total_Count = c(n1, n2)
+)
+
+ggplot(prop_comparison, aes(x = Location, y = Weekend_Proportion, fill = Location)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  geom_text(aes(label = paste0(round(Weekend_Proportion * 100, 1), "%\n(", 
+                                Weekend_Count, "/", Total_Count, ")")), 
+            vjust = -0.3, size = 4) +
+  geom_hline(yintercept = 0.30, linetype = "dashed", color = "red", linewidth = 1) +
+  annotate("text", x = 1.5, y = 0.32, label = "Reference: 30%", color = "red") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5),
+                     expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Weekend Session Proportion by Location",
+       subtitle = paste("Two-sample test p-value:", format(prop_test_two$p.value, scientific = TRUE)),
+       x = "Location",
+       y = "Proportion of Weekend Sessions") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 15, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
+
+#-----------------------------------------
+# 4. Summary Table
+#-----------------------------------------
+
+summary_proportion <- data.frame(
+  Test = c("One-Sample (Weekend = 0.30)", 
+           paste("Two-Sample (", substr(top_2_locations[1], 1, 15), " vs ", 
+                 substr(top_2_locations[2], 1, 15), ")", sep = "")),
+  Observed = c(paste0(round(p_observed * 100, 2), "%"),
+               paste0(round(p1 * 100, 2), "% vs ", round(p2 * 100, 2), "%")),
+  Test_Statistic = c(paste("χ² =", round(prop_test_one$statistic, 3)),
+                     paste("χ² =", round(prop_test_two$statistic, 3))),
+  p_value = c(format(prop_test_one$p.value, scientific = TRUE),
+              format(prop_test_two$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(prop_test_one$conf.int[1], 4), ", ", 
+                   round(prop_test_one$conf.int[2], 4), ")"),
+            paste0("(", round(prop_test_two$conf.int[1], 4), ", ", 
+                   round(prop_test_two$conf.int[2], 4), ")")),
+  Decision = c(ifelse(prop_test_one$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(prop_test_two$p.value < alpha, "Reject H0", "Fail to reject H0"))
+)
+
+kable(summary_proportion,
+      caption = paste("Proportion Inference Summary (α =", alpha, ")"),
+      col.names = c("Test", "Observed Proportion", "Test Statistic", 
+                    "p-value", "95% CI", "Decision"),
+      align = "llrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+Variance/spread comparisons
+
+
+F-test for variance in Energy Provided (kWh) between two groups:
+
+
+PAID vs ROAMING (Session Status) or weekend vs weekday.
+
+
+
+```{r}
+### Variance/Spread Comparisons (F-Test)
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. F-Test: PAID vs ROAMING (Session Status)
+#-----------------------------------------
+
+cat("===== F-TEST FOR VARIANCE: PAID vs ROAMING =====\n")
+cat("H0: σ²_PAID = σ²_ROAMING (Variances are equal)\n")
+cat("Ha: σ²_PAID ≠ σ²_ROAMING (Variances are not equal)\n")
+cat("α =", alpha, "\n\n")
+
+# Filter data for PAID and ROAMING sessions
+paid_data <- ev_data %>% filter(`Session Status` == "PAID")
+roaming_data <- ev_data %>% filter(`Session Status` == "ROAMING")
+
+# Sample statistics
+n_paid <- nrow(paid_data)
+n_roaming <- nrow(roaming_data)
+var_paid <- var(paid_data$`Energy Provided (kWh)`, na.rm = TRUE)
+var_roaming <- var(roaming_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_paid <- sd(paid_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_roaming <- sd(roaming_data$`Energy Provided (kWh)`, na.rm = TRUE)
+
+cat("--- Sample Statistics ---\n")
+cat("PAID Sessions:\n")
+cat("  n =", n_paid, "\n")
+cat("  Variance (s²) =", round(var_paid, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_paid, 4), "kWh\n\n")
+
+cat("ROAMING Sessions:\n")
+cat("  n =", n_roaming, "\n")
+cat("  Variance (s²) =", round(var_roaming, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_roaming, 4), "kWh\n\n")
+
+cat("Variance Ratio (s²_PAID / s²_ROAMING):", round(var_paid / var_roaming, 4), "\n\n")
+
+# F-test
+f_test_status <- var.test(paid_data$`Energy Provided (kWh)`, 
+                           roaming_data$`Energy Provided (kWh)`, 
+                           conf.level = 1 - alpha)
+
+cat("--- F-Test Results ---\n")
+cat("F-statistic:", round(f_test_status$statistic, 4), "\n")
+cat("Degrees of freedom: df1 =", f_test_status$parameter[1], 
+    ", df2 =", f_test_status$parameter[2], "\n")
+cat("p-value:", format(f_test_status$p.value, scientific = TRUE), "\n")
+cat("95% CI for variance ratio:", round(f_test_status$conf.int[1], 4), 
+    "to", round(f_test_status$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(f_test_status$p.value < alpha, 
+                        "Reject H0 - Variances are significantly different", 
+                        "Fail to reject H0 - No significant difference in variances"), "\n")
+
+#-----------------------------------------
+# 2. F-Test: Weekend vs Weekday
+#-----------------------------------------
+
+cat("\n\n===== F-TEST FOR VARIANCE: Weekend vs Weekday =====\n")
+cat("H0: σ²_weekend = σ²_weekday (Variances are equal)\n")
+cat("Ha: σ²_weekend ≠ σ²_weekday (Variances are not equal)\n")
+cat("α =", alpha, "\n\n")
+
+# Filter data
+weekday_data <- ev_data %>% filter(is_weekend == FALSE)
+weekend_data <- ev_data %>% filter(is_weekend == TRUE)
+
+# Sample statistics
+n_weekday <- nrow(weekday_data)
+n_weekend <- nrow(weekend_data)
+var_weekday <- var(weekday_data$`Energy Provided (kWh)`, na.rm = TRUE)
+var_weekend <- var(weekend_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_weekday <- sd(weekday_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_weekend <- sd(weekend_data$`Energy Provided (kWh)`, na.rm = TRUE)
+
+cat("--- Sample Statistics ---\n")
+cat("Weekday Sessions:\n")
+cat("  n =", n_weekday, "\n")
+cat("  Variance (s²) =", round(var_weekday, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_weekday, 4), "kWh\n\n")
+
+cat("Weekend Sessions:\n")
+cat("  n =", n_weekend, "\n")
+cat("  Variance (s²) =", round(var_weekend, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_weekend, 4), "kWh\n\n")
+
+cat("Variance Ratio (s²_weekday / s²_weekend):", round(var_weekday / var_weekend, 4), "\n\n")
+
+# F-test
+f_test_weekend <- var.test(weekday_data$`Energy Provided (kWh)`, 
+                            weekend_data$`Energy Provided (kWh)`, 
+                            conf.level = 1 - alpha)
+
+cat("--- F-Test Results ---\n")
+cat("F-statistic:", round(f_test_weekend$statistic, 4), "\n")
+cat("Degrees of freedom: df1 =", f_test_weekend$parameter[1], 
+    ", df2 =", f_test_weekend$parameter[2], "\n")
+cat("p-value:", format(f_test_weekend$p.value, scientific = TRUE), "\n")
+cat("95% CI for variance ratio:", round(f_test_weekend$conf.int[1], 4), 
+    "to", round(f_test_weekend$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(f_test_weekend$p.value < alpha, 
+                        "Reject H0 - Variances are significantly different", 
+                        "Fail to reject H0 - No significant difference in variances"), "\n")
+
+#-----------------------------------------
+# 3. Levene's Test (Robust Alternative)
+#-----------------------------------------
+# F-test assumes normality; Levene's test is more robust
+
+cat("\n\n===== LEVENE'S TEST (Robust Alternative) =====\n")
+cat("More robust to departures from normality\n\n")
+
+# Levene's Test: PAID vs ROAMING
+cat("--- PAID vs ROAMING ---\n")
+ev_paid_roaming <- ev_data %>% filter(`Session Status` %in% c("PAID", "ROAMING"))
+levene_status <- leveneTest(`Energy Provided (kWh)` ~ `Session Status`, data = ev_paid_roaming)
+cat("F-statistic:", round(levene_status$`F value`[1], 4), "\n")
+cat("p-value:", format(levene_status$`Pr(>F)`[1], scientific = TRUE), "\n")
+cat("Decision:", ifelse(levene_status$`Pr(>F)`[1] < alpha, 
+                        "Reject H0 - Variances differ", 
+                        "Fail to reject H0 - Variances equal"), "\n\n")
+
+# Levene's Test: Weekend vs Weekday
+cat("--- Weekend vs Weekday ---\n")
+levene_weekend <- leveneTest(`Energy Provided (kWh)` ~ is_weekend, data = ev_data)
+cat("F-statistic:", round(levene_weekend$`F value`[1], 4), "\n")
+cat("p-value:", format(levene_weekend$`Pr(>F)`[1], scientific = TRUE), "\n")
+cat("Decision:", ifelse(levene_weekend$`Pr(>F)`[1] < alpha, 
+                        "Reject H0 - Variances differ", 
+                        "Fail to reject H0 - Variances equal"), "\n")
+
+#-----------------------------------------
+# 4. Visualization
+#-----------------------------------------
+
+# Boxplot: Energy by Session Status (PAID vs ROAMING)
+p1 <- ggplot(ev_paid_roaming, aes(x = `Session Status`, y = `Energy Provided (kWh)`, 
+                                   fill = `Session Status`)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  stat_summary(fun = var, geom = "text", aes(label = paste("s² =", round(..y.., 1))),
+               vjust = -0.5, size = 3.5) +
+  labs(title = "Energy Provided: PAID vs ROAMING",
+       subtitle = paste("F-test p-value:", format(f_test_status$p.value, scientific = TRUE)),
+       x = "Session Status",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1")
+
+# Boxplot: Energy by Weekend
+p2 <- ggplot(ev_data, aes(x = ifelse(is_weekend, "Weekend", "Weekday"), 
+                           y = `Energy Provided (kWh)`, 
+                           fill = is_weekend)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Energy Provided: Weekend vs Weekday",
+       subtitle = paste("F-test p-value:", format(f_test_weekend$p.value, scientific = TRUE)),
+       x = "Day Type",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+# Display plots side by side
+grid.arrange(p1, p2, ncol = 2)
+
+#-----------------------------------------
+# 5. Summary Table
+#-----------------------------------------
+
+summary_variance <- data.frame(
+  Comparison = c("PAID vs ROAMING", "Weekend vs Weekday"),
+  Group1_Variance = c(round(var_paid, 2), round(var_weekday, 2)),
+  Group2_Variance = c(round(var_roaming, 2), round(var_weekend, 2)),
+  F_statistic = c(round(f_test_status$statistic, 4), round(f_test_weekend$statistic, 4)),
+  df = c(paste(f_test_status$parameter[1], ",", f_test_status$parameter[2]),
+         paste(f_test_weekend$parameter[1], ",", f_test_weekend$parameter[2])),
+  p_value = c(format(f_test_status$p.value, scientific = TRUE),
+              format(f_test_weekend$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(f_test_status$conf.int[1], 3), ", ", 
+                   round(f_test_status$conf.int[2], 3), ")"),
+            paste0("(", round(f_test_weekend$conf.int[1], 3), ", ", 
+                   round(f_test_weekend$conf.int[2], 3), ")")),
+  Decision = c(ifelse(f_test_status$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(f_test_weekend$p.value < alpha, "Reject H0", "Fail to reject H0"))
+)
+
+kable(summary_variance,
+      caption = paste("F-Test for Variance Comparison (α =", alpha, ")"),
+      col.names = c("Comparison", "Variance (Group 1)", "Variance (Group 2)", 
+                    "F-statistic", "df", "p-value", "95% CI", "Decision"),
+      align = "lrrrrrrl") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+Correlation and regression (uses num_data)
+
+
+Correlation test between Charge Duration and Energy Provided.
+
+
+Simple linear regression:
+
+
+Energy Provided ~ Charge Duration.
+
+
+Multiple regression adding is_weekend and a few major Location Names.
+
+
+```{r}
+### Correlation and Regression Analysis
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. Correlation Test: Charge Duration vs Energy Provided
+#-----------------------------------------
+
+cat("===== CORRELATION TEST =====\n")
+cat("H0: ρ = 0 (No linear correlation)\n")
+cat("Ha: ρ ≠ 0 (Linear correlation exists)\n")
+cat("α =", alpha, "\n\n")
+
+# Pearson correlation test
+cor_test <- cor.test(ev_data$`Charge Duration (min)`, 
+                      ev_data$`Energy Provided (kWh)`, 
+                      method = "pearson",
+                      conf.level = 1 - alpha)
+
+cat("--- Pearson Correlation Test ---\n")
+cat("Correlation coefficient (r):", round(cor_test$estimate, 4), "\n")
+cat("t-statistic:", round(cor_test$statistic, 4), "\n")
+cat("Degrees of freedom:", cor_test$parameter, "\n")
+cat("p-value:", format(cor_test$p.value, scientific = TRUE), "\n")
+cat("95% CI for r:", round(cor_test$conf.int[1], 4), "to", round(cor_test$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(cor_test$p.value < alpha, 
+                        "Reject H0 - Significant correlation exists", 
+                        "Fail to reject H0 - No significant correlation"), "\n")
+
+# Interpretation of correlation strength
+r_value <- abs(cor_test$estimate)
+strength <- case_when(
+  r_value < 0.3 ~ "Weak",
+  r_value < 0.7 ~ "Moderate",
+  TRUE ~ "Strong"
+)
+cat("Correlation strength:", strength, "\n")
+
+# Coefficient of determination
+r_squared <- cor_test$estimate^2
+cat("R² (coefficient of determination):", round(r_squared, 4), 
+    paste0("(", round(r_squared * 100, 2), "% of variance explained)\n"))
+
+# Spearman correlation (non-parametric alternative)
+cor_test_spearman <- cor.test(ev_data$`Charge Duration (min)`, 
+                               ev_data$`Energy Provided (kWh)`, 
+                               method = "spearman")
+
+cat("\n--- Spearman Correlation (Non-parametric) ---\n")
+cat("Correlation coefficient (ρ):", round(cor_test_spearman$estimate, 4), "\n")
+cat("p-value:", format(cor_test_spearman$p.value, scientific = TRUE), "\n")
+
+# Scatterplot with correlation
+ggplot(ev_data, aes(x = `Charge Duration (min)`, y = `Energy Provided (kWh)`)) +
+  geom_point(alpha = 0.3, color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "darkred", linewidth = 1) +
+  annotate("text", 
+           x = max(ev_data$`Charge Duration (min)`, na.rm = TRUE) * 0.75,
+           y = max(ev_data$`Energy Provided (kWh)`, na.rm = TRUE) * 0.95,
+           label = paste0("r = ", round(cor_test$estimate, 3), 
+                          "\np < 0.001"),
+           size = 5, fontface = "bold", color = "darkred") +
+  labs(title = "Correlation: Charge Duration vs Energy Provided",
+       subtitle = paste("95% CI for r: [", round(cor_test$conf.int[1], 3), ", ", 
+                        round(cor_test$conf.int[2], 3), "]", sep = ""),
+       x = "Charge Duration (min)",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+#-----------------------------------------
+# 2. Simple Linear Regression
+#-----------------------------------------
+
+cat("\n\n===== SIMPLE LINEAR REGRESSION =====\n")
+cat("Model: Energy Provided = β0 + β1(Charge Duration) + ε\n\n")
+
+# Fit simple linear regression
+simple_model <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)`, data = ev_data)
+simple_summary <- summary(simple_model)
+
+cat("--- Model Summary ---\n")
+print(simple_summary)
+
+# Extract key statistics
+cat("\n--- Key Statistics ---\n")
+cat("Intercept (β0):", round(coef(simple_model)[1], 4), "\n")
+cat("Slope (β1):", round(coef(simple_model)[2], 4), "\n")
+cat("R²:", round(simple_summary$r.squared, 4), "\n")
+cat("Adjusted R²:", round(simple_summary$adj.r.squared, 4), "\n")
+cat("Residual Std Error:", round(simple_summary$sigma, 4), "\n")
+cat("F-statistic:", round(simple_summary$fstatistic[1], 4), "\n")
+
+# Confidence intervals for coefficients
+cat("\n--- 95% Confidence Intervals for Coefficients ---\n")
+print(confint(simple_model, level = 1 - alpha))
+
+# Interpretation
+cat("\n--- Interpretation ---\n")
+cat("For every 1 minute increase in Charge Duration,\n")
+cat("Energy Provided increases by", round(coef(simple_model)[2], 4), "kWh on average.\n")
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(simple_model)
+par(mfrow = c(1, 1))
+
+#-----------------------------------------
+# 3. Multiple Linear Regression
+#-----------------------------------------
+
+cat("\n\n===== MULTIPLE LINEAR REGRESSION =====\n")
+cat("Model: Energy Provided = β0 + β1(Charge Duration) + β2(is_weekend) + β3(Location) + ε\n\n")
+
+# Prepare data: select top 4 locations for cleaner model
+top_4_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(4) %>%
+  pull(`Location Name`)
+
+ev_regression <- ev_data %>%
+  filter(`Location Name` %in% top_4_locations) %>%
+  mutate(
+    Location = factor(`Location Name`),
+    is_weekend = as.factor(is_weekend)
+  )
+
+cat("Locations included in model:\n")
+print(top_4_locations)
+cat("\nSample size:", nrow(ev_regression), "\n\n")
+
+# Fit multiple regression
+multiple_model <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)` + is_weekend + Location, 
+                      data = ev_regression)
+multiple_summary <- summary(multiple_model)
+
+cat("--- Model Summary ---\n")
+print(multiple_summary)
+
+# Extract key statistics
+cat("\n--- Key Statistics ---\n")
+cat("R²:", round(multiple_summary$r.squared, 4), "\n")
+cat("Adjusted R²:", round(multiple_summary$adj.r.squared, 4), "\n")
+cat("Residual Std Error:", round(multiple_summary$sigma, 4), "\n")
+cat("F-statistic:", round(multiple_summary$fstatistic[1], 4), 
+    "on", multiple_summary$fstatistic[2], "and", multiple_summary$fstatistic[3], "df\n")
+cat("p-value:", format(pf(multiple_summary$fstatistic[1], 
+                          multiple_summary$fstatistic[2], 
+                          multiple_summary$fstatistic[3], 
+                          lower.tail = FALSE), scientific = TRUE), "\n")
+
+# Confidence intervals for coefficients
+cat("\n--- 95% Confidence Intervals for Coefficients ---\n")
+print(confint(multiple_model, level = 1 - alpha))
+
+# ANOVA table for multiple regression
+cat("\n--- ANOVA Table ---\n")
+print(anova(multiple_model))
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(multiple_model)
+par(mfrow = c(1, 1))
+
+#-----------------------------------------
+# 4. Model Comparison
+#-----------------------------------------
+
+cat("\n\n===== MODEL COMPARISON =====\n")
+
+# Compare R² values
+cat("--- R² Comparison ---\n")
+cat("Simple Model R²:", round(simple_summary$r.squared, 4), "\n")
+cat("Multiple Model R²:", round(multiple_summary$r.squared, 4), "\n")
+cat("Improvement:", round((multiple_summary$r.squared - simple_summary$r.squared) * 100, 2), 
+    "percentage points\n")
+
+# Compare adjusted R²
+cat("\n--- Adjusted R² Comparison ---\n")
+cat("Simple Model Adj R²:", round(simple_summary$adj.r.squared, 4), "\n")
+cat("Multiple Model Adj R²:", round(multiple_summary$adj.r.squared, 4), "\n")
+
+# AIC and BIC comparison (need to fit on same data)
+simple_model_subset <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)`, data = ev_regression)
+
+cat("\n--- AIC/BIC Comparison ---\n")
+cat("Simple Model - AIC:", round(AIC(simple_model_subset), 2), 
+    ", BIC:", round(BIC(simple_model_subset), 2), "\n")
+cat("Multiple Model - AIC:", round(AIC(multiple_model), 2), 
+    ", BIC:", round(BIC(multiple_model), 2), "\n")
+cat("Lower values indicate better fit\n")
+
+#-----------------------------------------
+# 5. Coefficient Visualization
+#-----------------------------------------
+
+# Extract coefficients for visualization
+coef_df <- data.frame(
+  Term = names(coef(multiple_model)),
+  Estimate = coef(multiple_model),
+  CI_lower = confint(multiple_model)[, 1],
+  CI_upper = confint(multiple_model)[, 2]
+) %>%
+  filter(Term != "(Intercept)")  # Remove intercept for cleaner plot
+
+# Coefficient plot
+ggplot(coef_df, aes(x = reorder(Term, Estimate), y = Estimate)) +
+  geom_point(size = 3, color = "steelblue") +
+  geom_errorbar(aes(ymin = CI_lower, ymax = CI_upper), width = 0.2, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  coord_flip() +
+  labs(title = "Multiple Regression Coefficients",
+       subtitle = "With 95% Confidence Intervals",
+       x = "Predictor",
+       y = "Coefficient Estimate") +
+  theme_minimal()
+
+#-----------------------------------------
+# 6. Summary Tables
+#-----------------------------------------
+
+# Correlation summary
+correlation_summary <- data.frame(
+  Method = c("Pearson", "Spearman"),
+  Coefficient = c(round(cor_test$estimate, 4), round(cor_test_spearman$estimate, 4)),
+  p_value = c(format(cor_test$p.value, scientific = TRUE), 
+              format(cor_test_spearman$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(cor_test$conf.int[1], 4), ", ", 
+                   round(cor_test$conf.int[2], 4), ")"), "N/A"),
+  Decision = c(ifelse(cor_test$p.value < alpha, "Significant", "Not Significant"),
+               ifelse(cor_test_spearman$p.value < alpha, "Significant", "Not Significant"))
+)
+
+kable(correlation_summary,
+      caption = paste("Correlation Test Summary (α =", alpha, ")"),
+      col.names = c("Method", "Coefficient", "p-value", "95% CI", "Decision"),
+      align = "lrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+# Regression model comparison
+model_comparison <- data.frame(
+  Model = c("Simple (Duration only)", "Multiple (Duration + Weekend + Location)"),
+  R_squared = c(round(simple_summary$r.squared, 4), round(multiple_summary$r.squared, 4)),
+  Adj_R_squared = c(round(simple_summary$adj.r.squared, 4), round(multiple_summary$adj.r.squared, 4)),
+  RSE = c(round(simple_summary$sigma, 4), round(multiple_summary$sigma, 4)),
+  AIC = c(round(AIC(simple_model_subset), 2), round(AIC(multiple_model), 2)),
+  BIC = c(round(BIC(simple_model_subset), 2), round(BIC(multiple_model), 2))
+)
+
+kable(model_comparison,
+      caption = "Regression Model Comparison",
+      col.names = c("Model", "R²", "Adj R²", "Residual SE", "AIC", "BIC"),
+      align = "lrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+# Multiple regression coefficients table
+coef_table <- data.frame(
+  Term = rownames(summary(multiple_model)$coefficients),
+  Estimate = round(summary(multiple_model)$coefficients[, 1], 4),
+  Std_Error = round(summary(multiple_model)$coefficients[, 2], 4),
+  t_value = round(summary(multiple_model)$coefficients[, 3], 4),
+  p_value = format(summary(multiple_model)$coefficients[, 4], scientific = TRUE),
+  Significant = ifelse(summary(multiple_model)$coefficients[, 4] < alpha, "Yes", "No")
+)
+
+kable(coef_table,
+      caption = paste("Multiple Regression Coefficients (α =", alpha, ")"),
+      col.names = c("Term", "Estimate", "Std Error", "t-value", "p-value", "Significant?"),
+      align = "lrrrrr",
+      row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
 
