@@ -15,12 +15,24 @@ geometry: "margin=1in"
 fontsize: 12pt
 ---
 
+```{r}
+# Install and load required packages
+packages <- c(
+  "tidyverse", "knitr", "kableExtra", "corrplot", "psych", "car",
+  "moments", "gridExtra", "ggplot2", "dplyr", "lubridate"
+)
+to_install <- packages[!(packages %in% installed.packages()[, "Package"])]
+if (length(to_install) > 0) {
+  install.packages(to_install)
+}
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
   eval = TRUE,
-  tidy=TRUE, 
-  tidy.opts=list(width.cutoff=60),
+  tidy = TRUE,
+  tidy.opts = list(width.cutoff = 60),
   warning = FALSE,
   message = FALSE,
   fig.width = 8,
@@ -52,14 +64,12 @@ ev_data <- read.csv("Data/EV_Charging/EV_Charging_Data-_Municipal_Lots_and_Garag
 
 2. Choose ID tag as an unique identifier: (still need to consider this decision)
 ```{r}
-
 # Choose ID_tag as unique identifier
 # Check if ID_tag is unique
 sum(duplicated(ev_data$`ID Tag`))
 # Keep only the first row per ID_tag
 ev_data <- ev_data %>%
   distinct(`ID Tag`, .keep_all = TRUE)
-
 ```
 
 3. Remove Columns and rows that are not relevant to our experiment:
@@ -84,17 +94,16 @@ ev_data <- ev_data %>%
 
 4.Convert type from chr to numeric
 ```{r}
-#change Charge Duration (min) to numeric
+# change Charge Duration (min) to numeric
 ev_data <- ev_data %>%
   mutate(`Charge Duration (min)` = as.numeric(gsub(",", "", `Charge Duration (min)`)))
-#change Connected Duration (min) to numeric
+# change Connected Duration (min) to numeric
 ev_data <- ev_data %>%
   mutate(`Connected Duration (min)` = as.numeric(gsub(",", "", `Connected Duration (min)`)))
 ```
 
 5. Add columns based on Dates
 ```{r}
-
 # Sort the data based on date
 ev_data$Date <- as.Date(ev_data$Date, format = "%m/%d/%Y")
 ev_data <- ev_data %>%
@@ -124,61 +133,58 @@ holidays_2024 <- as.Date(c(
   "2024-10-14", # Columbus/Indigenous Peoples' Day
   "2024-11-11", # Veterans Day
   "2024-11-28", # Thanksgiving
-  "2024-12-25"  # Christmas
+  "2024-12-25" # Christmas
 ))
 
 ev_data <- ev_data %>%
   mutate(
     is_holiday_2024 = Date %in% holidays_2024
   )
-
-
 ```
 
 
 6. Clean the location names:
 
 ```{r}
-
 # Standardize location names
 ev_data <- ev_data %>%
   mutate(
     `Location Name` = case_when(
       # Jerome Gun Hill Road variations
-      grepl("JGU|Jerome.*Gun Hill", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("JGU|Jerome.*Gun Hill", `Location Name`, ignore.case = TRUE) ~
         "Jerome Gun Hill Road Municipal Parking Garage",
-      
+
       # Bay Ridge variations
-      grepl("BRI|Bay Ridge", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("BRI|Bay Ridge", `Location Name`, ignore.case = TRUE) ~
         "Bay Ridge Municipal Parking Garage",
-      
+
       # Delancey and Essex variations
-      grepl("DES|Delancey.*Essex", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("DES|Delancey.*Essex", `Location Name`, ignore.case = TRUE) ~
         "Delancey and Essex Municipal Parking Garage",
-      
+
       # Queens Borough Hall variations
-      grepl("QBO|Queensboro Hall|Queens Borough Hall", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("QBO|Queensboro Hall|Queens Borough Hall", `Location Name`, ignore.case = TRUE) ~
         "Queens Borough Hall Municipal Parking Garage",
-      
+
       # Jerome 190th Street variations
-      grepl("JON|Jerome.*190", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("JON|Jerome.*190", `Location Name`, ignore.case = TRUE) ~
         "Jerome 190th Street Municipal Parking Garage",
-      
+
       # St. George Courthouse variations
-      grepl("SGE|St\\.? George", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("SGE|St\\.? George", `Location Name`, ignore.case = TRUE) ~
         "St. George Courthouse Garage",
-      
+
       # Court Square variations
-      grepl("CSQ|Court Square", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("CSQ|Court Square", `Location Name`, ignore.case = TRUE) ~
         "Court Square Municipal Parking Garage",
-      
+
       # Queens Family Court variations
-      grepl("QFA|Queens Family Court", `Location Name`, ignore.case = TRUE) ~ 
+      grepl("QFA|Queens Family Court", `Location Name`, ignore.case = TRUE) ~
         "Queens Family Court Municipal Garage",
-      
+
       # Handle N/A
       `Location Name` == "N/A" ~ NA_character_,
-      
+
       # Keep everything else as is
       TRUE ~ `Location Name`
     )
@@ -189,7 +195,6 @@ unique(ev_data$`Location Name`)
 
 # Count how many of each location
 ev_data %>% count(`Location Name`, sort = TRUE)
-
 ```
 
 7.Add EV charging box brand (manufacturer) as column:
@@ -229,7 +234,6 @@ ev_data <- ev_data %>%
 7. Data info:
 
 ```{r}
-
 head(ev_data, 10)
 # Print column names nicely
 cat("Column names:\n")

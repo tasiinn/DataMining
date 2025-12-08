@@ -21,6 +21,28 @@ build/
 
 # VS Code settings
 .vscode/
+*.code-workspace
+
+########################################
+# Python (if using reticulate)
+########################################
+__pycache__/
+*.pyc
+*.pyo
+
+########################################
+# OS-specific
+########################################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # Environments
 .env
