@@ -1,51 +1,25 @@
-########################################
-# R files
-########################################
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+**/.DS_Store
+.DS_Store
+Data/.DS_Store
 
-# History files
-.Rhistory
-.Rapp.history
 
-# Session data files
-.RData
-.RDataTmp
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+*.egg
 
-# User-specific files
-.Ruserdata
-
-# Example code in package build process
-*-Ex.R
-
-# Output of R CMD build and R CMD check
-/*.tar.gz
-/*.Rcheck/
-
-# RStudio temporary files
-.Rproj.user/
-.Rproj.user/*
-*.Rproj
-
-# Packrat / renv package management
-packrat/
-renv/library/
-renv/staging/
-renv/python/
-renv/cache/
-
-# R environment files
-.Renviron
-.Rprofile
-
-# R markdown caches
-*_cache/
-cache/
-rsconnect/
-
-# Shiny apps
-shinyapps/
-shinyapps.json
-
-# VS Code workspace settings
+# VS Code settings
 .vscode/
 *.code-workspace
 
@@ -70,6 +44,15 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Linux
-*~
+# Environments
+.env
+.env.*
+.venv
+.venv.*
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.Rproj.user
 Data/.DS_Store

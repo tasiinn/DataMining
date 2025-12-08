@@ -1,6 +1,6 @@
 ---
 title: "DSCC/CSC/TCS 462 Project"
-author: "Group 3 "
+author: "Group 3"
 date: "`r Sys.Date()`"
 output: 
   pdf_document:
@@ -42,16 +42,14 @@ knitr::opts_chunk$set(
 )
 
 # Load required libraries
-library(tidyverse) # Data manipulation and visualization
-library(knitr) # For nice tables
-library(kableExtra) # Enhanced table formatting
-library(corrplot) # Correlation plots
-library(psych) # Descriptive statistics
-library(car) # Box-Cox transformation
-library(moments) # Skewness and kurtosis
-library(gridExtra) # Arranging plots
-library(ggplot2) # Advanced plotting
-library(dplyr) # Data manipulation
+library(tidyverse)      # Data manipulation and visualization
+library(knitr)          # For nice tables
+library(kableExtra)     # Enhanced table formatting
+library(corrplot)       # Correlation plots
+library(psych)          # Descriptive statistics
+library(gridExtra)      # Arranging plots
+library(ggplot2)        # Advanced plotting
+library(dplyr)          # Data manipulation
 library(lubridate)
 ```
 
@@ -64,7 +62,7 @@ In this step, we want to:
 ev_data <- read.csv("Data/EV_Charging/EV_Charging_Data-_Municipal_Lots_and_Garages_20251106.csv", stringsAsFactors = FALSE, check.names = FALSE)
 ```
 
-2. Choose ID tag as an unique identifier:
+2. Choose ID tag as an unique identifier: (still need to consider this decision)
 ```{r}
 # Choose ID_tag as unique identifier
 # Check if ID_tag is unique
@@ -74,7 +72,7 @@ ev_data <- ev_data %>%
   distinct(`ID Tag`, .keep_all = TRUE)
 ```
 
-3. Remove Columns and rows that are not relevent to our experiment:
+3. Remove Columns and rows that are not relevant to our experiment:
 ```{r}
 # Remove columns: Driver_id, Invalidity_reason, country
 ev_data <- ev_data %>%
@@ -199,12 +197,44 @@ unique(ev_data$`Location Name`)
 ev_data %>% count(`Location Name`, sort = TRUE)
 ```
 
+7.Add EV charging box brand (manufacturer) as column:
+
+```{r}
+# Add Manufacturer column based on Station Name patterns
+ev_data <- ev_data %>%
+  mutate(
+    Manufacturer = case_when(
+      # BTCE followed by four digits - BTC Power
+      grepl("^BTCE\\d{4}", `Station Name`) ~ "BTC Power",
+      
+      # EVB followed by four digits - EVB
+      grepl("^EVB\\d{4}", `Station Name`) ~ "EVB",
+      
+      # EVX1420 or EVX1420z - EVX
+      grepl("^EVX1420", `Station Name`) ~ "EVX",
+      
+      # EV followed by four digits (but not EVB or EVX) - Fast Charger
+      grepl("^EV\\d{4}", `Station Name`) ~ "Fast Charger (Multiple)",
+      
+      # Six digit numbers - Unknown
+      grepl("^\\d{6}$", `Station Name`) ~ "Unknown",
+      
+      # DELETED - Deleted
+      grepl("DELETED", `Station Name`, ignore.case = TRUE) ~ "Deleted",
+      
+      # Anything else
+      TRUE ~ "Other"
+    )
+  )
+
+
+
+```
+
 7. Data info:
 
 ```{r}
 head(ev_data, 10)
-
-
 # Print column names nicely
 cat("Column names:\n")
 cat(paste(1:length(names(ev_data)), names(ev_data), sep = ". "), sep = "\n")
@@ -212,564 +242,1367 @@ cat(paste(1:length(names(ev_data)), names(ev_data), sep = ". "), sep = "\n")
 write.csv(ev_data, "EV_data_processed.csv", row.names = FALSE)
 ```
 
+8. Filter Dataframe by date: year 2024
 
-# Data Loading and Preparation
-
-```{r data-loading}
-# Load your dataset here
-# Example: Replace with your actual data loading
-# data <- read.csv("your_data.csv")
-# data <- read.xlsx("your_data.xlsx")
-
-# For demonstration, we'll use the built-in mtcars dataset
-data <- mtcars
-data$cyl <- factor(data$cyl) # Convert to factor for categorical analysis
-data$vs <- factor(data$vs)
-data$am <- factor(data$am)
-
-# Display basic information about the dataset
-cat("Dataset dimensions:", dim(data), "\n")
-cat("Variable names:", names(data), "\n")
-str(data)
+```{r}
+ev_data_2024 <- ev_data %>%
+  filter(Date >= as.Date("2024-01-01") & Date <= as.Date("2024-12-31"))
 ```
 
-```{r data-preview}
-# Preview the data
-kable(head(data, 10), caption = "First 10 rows of the dataset") %>%
-  kable_styling(latex_options = c("striped", "hold_position"))
-```
 
-# Frequency Tables
+# Descriptive Analysis
 
-## Absolute Frequency Tables
+### Frequency Tables
 
-```{r absolute-frequency-tables}
-# For categorical variables
-categorical_vars <- sapply(data, is.factor)
-cat_data <- data[, categorical_vars, drop = FALSE]
 
-if (ncol(cat_data) > 0) {
-  for (var in names(cat_data)) {
-    cat("\n### Absolute Frequency Table for", var, "\n")
-    freq_table <- table(cat_data[[var]])
-    print(kable(freq_table,
-      col.names = c(var, "Frequency"),
-      caption = paste("Absolute Frequency Table for", var)
-    ) %>%
-      kable_styling(latex_options = c("striped", "hold_position")))
-  }
-} else {
-  cat("No categorical variables found in the dataset.\n")
-}
-
-# For numerical variables (binned)
-numerical_vars <- sapply(data, is.numeric)
-num_data <- data[, numerical_vars, drop = FALSE]
-
-for (var in names(num_data)[1:2]) { # Show first 2 numerical variables as example
-  cat("\n### Binned Frequency Table for", var, "\n")
-  breaks <- pretty(num_data[[var]], n = 8)
-  freq_table <- table(cut(num_data[[var]], breaks = breaks, include.lowest = TRUE))
-  print(kable(freq_table,
-    col.names = c("Interval", "Frequency"),
-    caption = paste("Binned Frequency Table for", var)
-  ) %>%
-    kable_styling(latex_options = c("striped", "hold_position")))
-}
-```
-
-## Relative Frequency Tables
-
-```{r relative-frequency-tables}
-# For categorical variables
-if (ncol(cat_data) > 0) {
-  for (var in names(cat_data)) {
-    cat("\n### Relative Frequency Table for", var, "\n")
-    freq_table <- table(cat_data[[var]])
-    rel_freq_table <- prop.table(freq_table)
-    rel_freq_df <- data.frame(
-      Category = names(rel_freq_table),
-      "Relative Frequency" = as.numeric(rel_freq_table),
-      "Percentage" = as.numeric(rel_freq_table) * 100
-    )
-    print(kable(rel_freq_df,
-      digits = 4,
-      caption = paste("Relative Frequency Table for", var)
-    ) %>%
-      kable_styling(latex_options = c("striped", "hold_position")))
-  }
-}
-
-# For numerical variables (binned)
-for (var in names(num_data)[1:2]) {
-  cat("\n### Relative Frequency Table for", var, "\n")
-  breaks <- pretty(num_data[[var]], n = 8)
-  freq_table <- table(cut(num_data[[var]], breaks = breaks, include.lowest = TRUE))
-  rel_freq_table <- prop.table(freq_table)
-  rel_freq_df <- data.frame(
-    Interval = names(rel_freq_table),
-    "Relative Frequency" = as.numeric(rel_freq_table),
-    "Percentage" = as.numeric(rel_freq_table) * 100
+```{r}
+# 1. Session Status distribution
+session_status_freq <- ev_data %>%
+  count(`Session Status`, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2)
   )
-  print(kable(rel_freq_df,
-    digits = 4,
-    caption = paste("Relative Frequency Table for", var)
+
+# Session Status bar chart
+ggplot(session_status_freq, aes(x = reorder(`Session Status`, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), vjust = -0.5) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Session Status Distribution", x = "Status", y = "Count") +
+  theme_minimal()
+
+# 2. Day of the week distribution
+weekday_freq <- ev_data %>%
+  count(weekday, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2)
+  )
+
+# Day of the week bar chart
+ggplot(weekday_freq, aes(x = reorder(weekday, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "darkgreen") +
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), vjust = -0.5) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Weekday Distribution", x = "Day", y = "Count") +
+  theme_minimal()
+
+# 3. Weekday vs. Weekend distribution
+weekend_freq <- ev_data %>%
+  count(is_weekend, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2),
+    type_of_day = ifelse(is_weekend == TRUE, "Weekend", "Weekday") 
+  )
+
+# Weekday vs. Weekend bar chart
+ggplot(weekend_freq, aes(x = reorder(type_of_day, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "seagreen") +
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), vjust = -0.5) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Weekday vs Weekend", x = "Type", y = "Count") +
+  theme_minimal()
+
+# 4. Location distribution
+location_freq <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  mutate(
+    percentage = n / sum(n) * 100,
+    percentage = round(percentage, 2)
+  )
+
+# Location bar chart
+ggplot(location_freq, aes(x = reorder(`Location Name`, -n), y = n)) +
+  geom_bar(stat = "identity", fill = "coral") +
+  coord_flip() +  # Flip for better readability
+  geom_text(aes(label = paste0(n, " (", percentage, "%)")), hjust = -0.1) + # Label of count and percentage
+  scale_y_continuous(expand = expansion(mult = c(0, 0.30))) + # Additional space to account for labels
+  labs(title = "Location Distribution", x = "Location", y = "Count") +
+  theme_minimal()
+
+# 5. Charging Start Hours distribution
+hourly_freq <- ev_data %>%
+  mutate(
+    time_object = hms(`Connected Time`),
+    hour_start = hour(time_object)
   ) %>%
-    kable_styling(latex_options = c("striped", "hold_position")))
-}
-```
+  filter(!is.na(hour_start)) %>%
+  count(hour_start) 
 
-# Bar Plots
+hourly_freq$hour_start <- factor(hourly_freq$hour_start, levels = 0:23)
 
-## Absolute Frequency Bar Plots
+# Charging Start Hours Bar Chart
+ggplot(hourly_freq, aes(x = hour_start, y = n)) +
+  geom_bar(stat = "identity", fill = "darkviolet") +
+  geom_text(aes(label = n), vjust = -0.5, size = 3.5) + # Label of count
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Peak Charging Start Times", x = "Hour of Day (24h)", y = "Count") +
+  theme_minimal()
 
-```{r absolute-barplots, fig.height=6}
-if (ncol(cat_data) > 0) {
-  plots_list <- list()
-  for (i in seq_along(names(cat_data))) {
-    var <- names(cat_data)[i]
-    p <- ggplot(cat_data, aes_string(x = var)) +
-      geom_bar(fill = "steelblue", alpha = 0.7) +
-      labs(
-        title = paste("Absolute Frequency Bar Plot for", var),
-        x = var, y = "Frequency"
-      ) +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    plots_list[[i]] <- p
-  }
-
-  if (length(plots_list) > 1) {
-    do.call(grid.arrange, c(plots_list, ncol = 2))
-  } else {
-    print(plots_list[[1]])
-  }
-} else {
-  cat("No categorical variables for bar plots.\n")
-}
-```
-
-## Relative Frequency Bar Plots
-
-```{r relative-barplots, fig.height=6}
-if (ncol(cat_data) > 0) {
-  plots_list <- list()
-  for (i in seq_along(names(cat_data))) {
-    var <- names(cat_data)[i]
-    p <- ggplot(cat_data, aes_string(x = var)) +
-      geom_bar(aes(y = after_stat(count / sum(count))), fill = "coral", alpha = 0.7) +
-      labs(
-        title = paste("Relative Frequency Bar Plot for", var),
-        x = var, y = "Relative Frequency"
-      ) +
-      theme_minimal() +
-      theme(axis.text.x = element_text(angle = 45, hjust = 1))
-    plots_list[[i]] <- p
-  }
-
-  if (length(plots_list) > 1) {
-    do.call(grid.arrange, c(plots_list, ncol = 2))
-  } else {
-    print(plots_list[[1]])
-  }
-}
-```
-
-# Summary Statistics
-
-## Measures of Center and Dispersion
-
-```{r summary-statistics}
-# Function to calculate comprehensive summary statistics
-comprehensive_summary <- function(x) {
-  if (is.numeric(x)) {
-    stats <- c(
-      Mean = mean(x, na.rm = TRUE),
-      Median = median(x, na.rm = TRUE),
-      Mode = as.numeric(names(sort(table(x), decreasing = TRUE))[1]),
-      "Trimmed Mean (10%)" = mean(x, trim = 0.1, na.rm = TRUE),
-      "Trimmed Mean (20%)" = mean(x, trim = 0.2, na.rm = TRUE),
-      IQR = IQR(x, na.rm = TRUE),
-      Variance = var(x, na.rm = TRUE),
-      "Std Deviation" = sd(x, na.rm = TRUE),
-      "Coeff of Variation" = sd(x, na.rm = TRUE) / mean(x, na.rm = TRUE) * 100,
-      Skewness = skewness(x, na.rm = TRUE),
-      Kurtosis = kurtosis(x, na.rm = TRUE),
-      Min = min(x, na.rm = TRUE),
-      Max = max(x, na.rm = TRUE),
-      Range = diff(range(x, na.rm = TRUE))
-    )
-    return(round(stats, 4))
-  } else {
-    return(NULL)
-  }
-}
-
-# Apply to all numerical variables
-summary_stats <- sapply(num_data, comprehensive_summary)
-summary_stats <- as.data.frame(summary_stats)
-
-kable(summary_stats,
-  caption = "Comprehensive Summary Statistics for Numerical Variables"
-) %>%
-  kable_styling(latex_options = c("striped", "hold_position", "scale_down"))
-```
-
-```{r basic-summary}
-# Additional summary using psych package
-describe_stats <- describe(num_data)
-kable(describe_stats,
-  digits = 4,
-  caption = "Descriptive Statistics (psych package)"
-) %>%
-  kable_styling(latex_options = c("striped", "hold_position", "scale_down"))
-```
-
-# Box Plots
-
-## Side-by-Side Box Plots
-
-```{r side-by-side-boxplots, fig.height=7}
-# Box plots for numerical variables
-if (ncol(num_data) > 0) {
-  # Overall box plots
-  num_data_long <- num_data %>%
-    pivot_longer(everything(), names_to = "Variable", values_to = "Value")
-
-  p1 <- ggplot(num_data_long, aes(x = Variable, y = Value)) +
-    geom_boxplot(fill = "lightblue", alpha = 0.7) +
-    labs(
-      title = "Side-by-Side Box Plots for All Numerical Variables",
-      x = "Variables", y = "Values"
-    ) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1))
-
-  print(p1)
-}
-
-# Box plots by categorical variables (if any)
-if (ncol(cat_data) > 0 && ncol(num_data) > 0) {
-  cat_var <- names(cat_data)[1] # Use first categorical variable
-  num_var <- names(num_data)[1] # Use first numerical variable
-
-  p2 <- ggplot(data, aes_string(x = cat_var, y = num_var, fill = cat_var)) +
-    geom_boxplot(alpha = 0.7) +
-    labs(
-      title = paste("Box Plot of", num_var, "by", cat_var),
-      x = cat_var, y = num_var
-    ) +
-    theme_minimal() +
-    theme(legend.position = "none")
-
-  print(p2)
-}
-```
-
-# Scatter Plots and Correlations
-
-## Correlation Matrix
-
-```{r correlation-matrix}
-# Correlation matrix for numerical variables
-if (ncol(num_data) > 1) {
-  cor_matrix <- cor(num_data, use = "complete.obs")
-
-  # Display correlation matrix as table
-  kable(cor_matrix,
-    digits = 3,
-    caption = "Correlation Matrix"
+# 6. Charging End Hours distribution
+end_hourly_freq <- ev_data %>%
+  mutate(
+    time_object = hms(`Disconnected Time`),
+    hour_end = hour(time_object)
   ) %>%
-    kable_styling(latex_options = c("striped", "hold_position"))
+  filter(!is.na(hour_end)) %>%
+  count(hour_end)
 
-  # Visual correlation matrix
-  corrplot(cor_matrix,
-    method = "color", type = "upper",
-    order = "hclust", tl.cex = 0.8, tl.col = "black",
-    title = "Correlation Matrix Heatmap", mar = c(0, 0, 2, 0)
+end_hourly_freq$hour_end <- factor(end_hourly_freq$hour_end, levels = 0:23)
+
+# Charging End Hours Bar Chart
+ggplot(end_hourly_freq, aes(x = hour_end, y = n)) +
+  geom_bar(stat = "identity", fill = "darkred") +
+  geom_text(aes(label = n), vjust = -0.5, size = 3.5) + # Label of count
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) + # Additional space to account for labels
+  labs(title = "Peak Charging End Times", x = "Hour of Day (24h)", y = "Count") +
+  theme_minimal()
+
+```
+### Side by side boxplot: 
+
+```{r}
+# 1. Boxplot: Energy Provided by Manufacturer
+ggplot(ev_data, aes(x = reorder(Manufacturer, `Energy Provided (kWh)`, FUN = median), 
+                         y = `Energy Provided (kWh)`, 
+                         fill = Manufacturer)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Energy Provided by Charger Manufacturer",
+       subtitle = "Comparing charging output across different manufacturers",
+       x = "Manufacturer",
+       y = "Energy Provided (kWh)")
+
+
+# 2. Boxplot: Charge Duration by Manufacturer
+ggplot(ev_data, aes(x = reorder(Manufacturer, `Charge Duration (min)`, FUN = median), 
+                         y = `Charge Duration (min)`, 
+                         fill = Manufacturer)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Charge Duration by Charger Manufacturer",
+       subtitle = "Comparing session length across different manufacturers",
+       x = "Manufacturer",
+       y = "Charge Duration (min)")
+```
+
+
+```{r}
+### Center and Dispersion Statistics
+
+# Function to calculate mode (R doesn't have a built-in mode function)
+get_mode <- function(x) {
+  x <- na.omit(x)
+  ux <- unique(x)
+  ux[which.max(tabulate(match(x, ux)))]
+}
+
+# Function to calculate all statistics for a variable
+calc_stats <- function(x, var_name) {
+  x <- na.omit(x)
+  
+  data.frame(
+    Variable = var_name,
+    Mean = round(mean(x), 3),
+    Median = round(median(x), 3),
+    Mode = round(get_mode(x), 3),
+    Trimmed_Mean_10pct = round(mean(x, trim = 0.10), 3),
+    IQR = round(IQR(x), 3),
+    Variance = round(var(x), 3),
+    Std_Dev = round(sd(x), 3),
+    CV = round((sd(x) / mean(x)) * 100, 2),  # Coefficient of Variation as percentage
+    Skewness = round(skewness(x), 3)
   )
 }
+
+# Calculate statistics for Energy Provided and Charge Duration
+energy_stats <- calc_stats(ev_data$`Energy Provided (kWh)`, "Energy Provided (kWh)")
+duration_stats <- calc_stats(ev_data$`Charge Duration (min)`, "Charge Duration (min)")
+
+# Combine into one table
+summary_stats <- rbind(energy_stats, duration_stats)
+
+# Display the table
+kable(summary_stats, 
+      caption = "Summary Statistics: Measures of Center and Dispersion",
+      col.names = c("Variable", "Mean", "Median", "Mode", "Trimmed Mean (10%)", 
+                    "IQR", "Variance", "Std Dev", "CV (%)", "Skewness"),
+      align = "lrrrrrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
 ```
 
-## Scatter Plots
 
-```{r scatterplots, fig.height=9}
-# if(ncol(num_data) > 1) {
-#   # Create scatter plot matrix
-#   pairs(num_data,
-#         main = "Scatter Plot Matrix",
-#         pch = 19,
-#         col = alpha("steelblue", 0.6))
-#
-#   # Individual scatter plots for first few variable pairs
-#   var_names <- names(num_data)[1:min(4, ncol(num_data))]
-#   plots_list <- list()
-#   plot_count <- 1
-#
-#   for(i in 1:(length(var_names)-1)) {
-#     for(j in (i+1):length(var_names)) {
-#       if(plot_count <= 6) {  # Limit to 6 plots
-#         cor_val <- cor(num_data[[var_names[i]]], num_data[[var_names[j]]], use = "complete.obs")
-#
-#         p <- ggplot(data, aes_string(x = var_names[i], y = var_names[j])) +
-#           geom_point(alpha = 0.6, color = "steelblue") +
-#           geom_smooth(method = "lm", se = TRUE, color = "red") +
-#           labs(title = paste(var_names[i], "vs", var_names[j],
-#                            "\nCorrelation:", round(cor_val, 3))) +
-#           theme_minimal()
-#
-#         plots_list[[plot_count]] <- p
-#         plot_count <- plot_count + 1
-#       }
-#     }
-#   }
-#
-#   if(length(plots_list) > 0) {
-#     do.call(grid.arrange, c(plots_list, ncol = 2))
-#   }
-# }
+
+```{r}
+# Total Energy Consumed by Day of Week
+energy_by_day <- ev_data %>%
+  group_by(weekday) %>%
+  summarise(
+    total_energy = sum(`Energy Provided (kWh)`, na.rm = TRUE),
+    num_sessions = n(),
+    avg_energy = mean(`Energy Provided (kWh)`, na.rm = TRUE)
+  ) %>%
+  mutate(
+    total_energy_rounded = round(total_energy, 0),
+    avg_energy_rounded = round(avg_energy, 2)
+  )
+
+# Bar plot of Total Energy by Weekday
+ggplot(energy_by_day, aes(x = weekday, y = total_energy, fill = weekday)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(format(total_energy_rounded, big.mark = ","), " kWh")), 
+            vjust = -0.5, size = 3.5) +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Total Energy Consumed by Day of Week",
+       x = "Day of Week",
+       y = "Total Energy (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 45, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
 ```
 
-# Histograms
+```{r}
+# Total Energy Consumed by Location
+energy_by_location <- ev_data %>%
+  group_by(`Location Name`) %>%
+  summarise(
+    total_energy = sum(`Energy Provided (kWh)`, na.rm = TRUE),
+    num_sessions = n(),
+    avg_energy = mean(`Energy Provided (kWh)`, na.rm = TRUE)
+  ) %>%
+  mutate(
+    total_energy_rounded = round(total_energy, 0),
+    avg_energy_rounded = round(avg_energy, 2)
+  )
 
-```{r histograms, fig.height=9}
-if (ncol(num_data) > 0) {
-  plots_list <- list()
+# Bar plot of Total Energy by Location
+ggplot(energy_by_location, aes(x = reorder(`Location Name`, total_energy), 
+                                y = total_energy, 
+                                fill = `Location Name`)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(format(total_energy_rounded, big.mark = ","), " kWh")), 
+            hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.20))) +
+  labs(title = "Total Energy Consumed by Location",
+       x = "Location",
+       y = "Total Energy (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set3")
 
-  for (i in seq_along(names(num_data))) {
-    var <- names(num_data)[i]
-    var_data <- num_data[[var]]
+# Bar plot of Average Energy per Session by Location
+ggplot(energy_by_location, aes(x = reorder(`Location Name`, avg_energy), 
+                                y = avg_energy, 
+                                fill = `Location Name`)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = paste0(avg_energy_rounded, " kWh")), 
+            hjust = -0.1, size = 3.5) +
+  coord_flip() +
+  scale_y_continuous(expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Average Energy per Session by Location",
+       x = "Location",
+       y = "Average Energy (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set3")
+```
 
-    # Calculate statistics
-    mean_val <- mean(var_data, na.rm = TRUE)
-    median_val <- median(var_data, na.rm = TRUE)
 
-    # Determine optimal number of bins using Freedman-Diaconis rule
-    iqr_val <- IQR(var_data, na.rm = TRUE)
-    n <- length(var_data[!is.na(var_data)])
-    bin_width <- 2 * iqr_val / (n^(1 / 3))
-    n_bins <- ceiling(diff(range(var_data, na.rm = TRUE)) / bin_width)
-    n_bins <- max(5, min(n_bins, 30)) # Ensure reasonable number of bins
+```{r}
+### Heatmap of Temporal Usage (Weekday × Hour of Day)
 
-    p <- ggplot(data, aes_string(x = var)) +
-      geom_histogram(
-        bins = n_bins, fill = "lightblue",
-        alpha = 0.7, color = "black", linewidth = 0.3
-      ) +
-      geom_vline(
-        xintercept = mean_val, color = "red",
-        linetype = "dashed", linewidth = 1
-      ) +
-      geom_vline(
-        xintercept = median_val, color = "blue",
-        linetype = "solid", linewidth = 1
-      ) +
-      labs(
-        title = paste("Histogram of", var, "(", n_bins, "bins)"),
-        subtitle = paste(
-          "Red line: Mean (", round(mean_val, 2),
-          "), Blue line: Median (", round(median_val, 2), ")"
-        ),
-        x = var, y = "Frequency"
-      ) +
-      theme_minimal()
+# Prepare data: extract hour and summarize
+temporal_data <- ev_data %>%
+  mutate(
+    time_object = hms(`Connected Time`),
+    hour = hour(time_object)
+  ) %>%
+  filter(!is.na(hour)) %>%
+  group_by(weekday, hour) %>%
+  summarise(
+    num_sessions = n(),
+    avg_energy = round(mean(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    total_energy = round(sum(`Energy Provided (kWh)`, na.rm = TRUE), 0),
+    .groups = "drop"
+  )
 
-    plots_list[[i]] <- p
-  }
+# Ensure proper weekday order
+temporal_data$weekday <- factor(temporal_data$weekday,
+                                 levels = c("Monday", "Tuesday", "Wednesday", "Thursday",
+                                            "Friday", "Saturday", "Sunday"))
 
-  # Arrange plots
-  do.call(grid.arrange, c(plots_list, ncol = 2))
+# 1. Heatmap: Number of Sessions by Weekday × Hour
+ggplot(temporal_data, aes(x = hour, y = weekday, fill = num_sessions)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = num_sessions), size = 2.5, color = "black") +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(title = "Number of Charging Sessions by Day and Hour",
+       subtitle = "Identifying peak charging times",
+       x = "Hour of Day (24h)",
+       y = "Day of Week",
+       fill = "Sessions") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+# 2. Heatmap: Average Energy per Session by Weekday × Hour
+ggplot(temporal_data, aes(x = hour, y = weekday, fill = avg_energy)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = avg_energy), size = 2.5, color = "black") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(title = "Average Energy per Session by Day and Hour",
+       subtitle = "When do longer/fuller charges happen?",
+       x = "Hour of Day (24h)",
+       y = "Day of Week",
+       fill = "Avg kWh") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+
+# 3. Heatmap: Total Energy by Weekday × Hour
+ggplot(temporal_data, aes(x = hour, y = weekday, fill = total_energy)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient(low = "lightgreen", high = "darkgreen") +
+  scale_x_continuous(breaks = 0:23) +
+  labs(title = "Total Energy Consumed by Day and Hour",
+       subtitle = "Grid demand patterns",
+       x = "Hour of Day (24h)",
+       y = "Day of Week",
+       fill = "Total kWh") +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+```
+
+#Inferencial Statistics:
+
+### Weekend vs weekday differences
+
+- Two-sample t-tests (or Wilcoxon based on normality) on Charge Duration and Energy Provided:
+- 95% CI for the difference in means.
+- Have to check for normality (or lack of it) using the histograms + Q–Q plots from desc stats.
+
+```{r}
+### Weekend vs Weekday Differences
+
+alpha <- 0.05
+
+# Separate data into weekend and weekday groups
+weekday_data <- ev_data %>% filter(is_weekend == FALSE)
+weekend_data <- ev_data %>% filter(is_weekend == TRUE)
+
+# Display sample sizes
+cat("Sample Sizes:\n")
+cat("Weekday sessions:", nrow(weekday_data), "\n")
+cat("Weekend sessions:", nrow(weekend_data), "\n")
+cat("Significance Level: α =", alpha, "\n")
+
+#-----------------------------------------
+# 1. Normality Check: Histograms
+#-----------------------------------------
+
+# Histogram: Energy Provided by Weekend vs Weekday
+ggplot(ev_data, aes(x = `Energy Provided (kWh)`, fill = is_weekend)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  facet_wrap(~ ifelse(is_weekend, "Weekend", "Weekday"), scales = "free_y") +
+  labs(title = "Distribution of Energy Provided: Weekday vs Weekend",
+       x = "Energy Provided (kWh)",
+       y = "Count") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+# Histogram: Charge Duration by Weekend vs Weekday
+ggplot(ev_data, aes(x = `Charge Duration (min)`, fill = is_weekend)) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  facet_wrap(~ ifelse(is_weekend, "Weekend", "Weekday"), scales = "free_y") +
+  labs(title = "Distribution of Charge Duration: Weekday vs Weekend",
+       x = "Charge Duration (min)",
+       y = "Count") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+#-----------------------------------------
+# 2. Normality Check: Q-Q Plots
+#-----------------------------------------
+
+# Q-Q Plot: Energy Provided - Weekday
+qqPlot(weekday_data$`Energy Provided (kWh)`,
+       main = "Q-Q Plot: Energy Provided (Weekday)",
+       ylab = "Energy Provided (kWh)")
+
+# Q-Q Plot: Energy Provided - Weekend
+qqPlot(weekend_data$`Energy Provided (kWh)`,
+       main = "Q-Q Plot: Energy Provided (Weekend)",
+       ylab = "Energy Provided (kWh)")
+
+# Q-Q Plot: Charge Duration - Weekday
+qqPlot(weekday_data$`Charge Duration (min)`,
+       main = "Q-Q Plot: Charge Duration (Weekday)",
+       ylab = "Charge Duration (min)")
+
+# Q-Q Plot: Charge Duration - Weekend
+qqPlot(weekend_data$`Charge Duration (min)`,
+       main = "Q-Q Plot: Charge Duration (Weekend)",
+       ylab = "Charge Duration (min)")
+
+
+#-----------------------------------------
+# 4. Hypothesis Tests for Energy Provided
+#-----------------------------------------
+
+# Wilcoxon rank-sum test
+wilcox_energy <- wilcox.test(`Energy Provided (kWh)` ~ is_weekend, data = ev_data,
+                              conf.int = TRUE, conf.level = 1 - alpha)
+cat("\n--- Wilcoxon Rank-Sum Test (Non-parametric) ---\n")
+cat("W statistic:", wilcox_energy$statistic, "\n")
+cat("p-value:", format(wilcox_energy$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference:", round(wilcox_energy$conf.int[1], 3), "to",
+    round(wilcox_energy$conf.int[2], 3), "kWh\n")
+cat("Decision:", ifelse(wilcox_energy$p.value < alpha,
+                        "Reject H0 - Significant difference exists",
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+#-----------------------------------------
+# 5. Hypothesis Tests for Charge Duration
+#-----------------------------------------
+
+# Wilcoxon rank-sum test
+wilcox_duration <- wilcox.test(`Charge Duration (min)` ~ is_weekend, data = ev_data,
+                                conf.int = TRUE, conf.level = 1 - alpha)
+cat("\n--- Wilcoxon Rank-Sum Test (Non-parametric) ---\n")
+cat("W statistic:", wilcox_duration$statistic, "\n")
+cat("p-value:", format(wilcox_duration$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference:", round(wilcox_duration$conf.int[1], 3), "to",
+    round(wilcox_duration$conf.int[2], 3), "min\n")
+cat("Decision:", ifelse(wilcox_duration$p.value < alpha,
+                        "Reject H0 - Significant difference exists",
+                        "Fail to reject H0 - No significant difference"), "\n")
+
+```
+
+
+### Location differences
+
+
+One-way ANOVA on Energy Provided across, let's say, the top 5 Location Name categories in the frequency table.
+
+
+If ANOVA assumptions fail (from Q–Q plots, boxplots), do Kruskal–Wallis instead.
+
+Chi-square test of independence between Location Name and Energy Provided using the contingency table.
+
+
+```{r}
+### Location Differences Analysis
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. Select Top 5 Locations by Frequency
+#-----------------------------------------
+
+top_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(5) %>%
+  pull(`Location Name`)
+
+cat("Top 5 Locations by Number of Sessions:\n")
+ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(5) %>%
+  print()
+
+# Filter data to top 5 locations
+ev_top_locations <- ev_data %>%
+  filter(`Location Name` %in% top_locations)
+
+cat("\nFiltered dataset size:", nrow(ev_top_locations), "sessions\n")
+
+#-----------------------------------------
+# 2. Descriptive Statistics by Location
+#-----------------------------------------
+
+location_summary <- ev_top_locations %>%
+  group_by(`Location Name`) %>%
+  summarise(
+    n = n(),
+    Mean = round(mean(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    Median = round(median(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    SD = round(sd(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    Variance = round(var(`Energy Provided (kWh)`, na.rm = TRUE), 2),
+    .groups = "drop"
+  )
+
+kable(location_summary,
+      caption = "Energy Provided (kWh) by Location - Descriptive Statistics",
+      col.names = c("Location", "n", "Mean", "Median", "Std Dev", "Variance"),
+      align = "lrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+#-----------------------------------------
+# 3. ANOVA Assumption Checks
+#-----------------------------------------
+
+
+# Boxplots - Visual check for outliers and distribution
+ggplot(ev_top_locations, aes(x = `Location Name`, y = `Energy Provided (kWh)`,
+                              fill = `Location Name`)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Energy Provided by Location (Top 4)",
+       subtitle = "Visual check for ANOVA assumptions",
+       x = "Location",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set2")
+
+# Q-Q Plots for each location
+par(mfrow = c(2, 2))
+for (loc in top_locations) {
+  loc_data <- ev_top_locations %>%
+    filter(`Location Name` == loc) %>%
+    pull(`Energy Provided (kWh)`)
+
+  qqnorm(loc_data, main = paste("Q-Q Plot:", substr(loc, 1, 25)))
+  qqline(loc_data, col = "red", lwd = 2)
 }
-```
+par(mfrow = c(1, 1))
 
-# Quantile Plots
+# Anova doesn't met
 
-## Q-Q Plots (Normal Quantile Plots)
+#-----------------------------------------
+# 4. Kruskal-Wallis Test (Non-parametric alternative)
+#-----------------------------------------
 
-```{r qq-plots, fig.height=9}
-if (ncol(num_data) > 0) {
-  plots_list <- list()
+cat("\n===== KRUSKAL-WALLIS TEST (Non-parametric) =====\n")
+cat("H0: All location distributions are equal\n")
+cat("Ha: At least one distribution is different\n")
+cat("α =", alpha, "\n\n")
 
-  for (i in seq_along(names(num_data))) {
-    var <- names(num_data)[i]
+kruskal_result <- kruskal.test(`Energy Provided (kWh)` ~ `Location Name`, data = ev_top_locations)
 
-    p <- ggplot(data, aes_string(sample = var)) +
-      stat_qq() +
-      stat_qq_line(color = "red") +
-      labs(
-        title = paste("Q-Q Plot for", var),
-        subtitle = "Red line shows normal distribution reference"
-      ) +
-      theme_minimal()
+cat("Chi-squared statistic:", round(kruskal_result$statistic, 4), "\n")
+cat("Degrees of freedom:", kruskal_result$parameter, "\n")
+cat("p-value:", format(kruskal_result$p.value, scientific = TRUE), "\n")
+cat("Decision:", ifelse(kruskal_result$p.value < alpha,
+                        "Reject H0 - Significant difference exists between locations",
+                        "Fail to reject H0 - No significant difference"), "\n")
 
-    plots_list[[i]] <- p
-  }
-
-  do.call(grid.arrange, c(plots_list, ncol = 2))
+# Post-hoc Dunn Test (if Kruskal-Wallis is significant)
+if (kruskal_result$p.value < alpha) {
+  cat("\n--- Dunn's Post-Hoc Test (Bonferroni adjustment) ---\n")
+  # Need to install FSA package for dunnTest
+  if (!require(FSA)) install.packages("FSA", quiet = TRUE)
+  library(FSA)
+  dunn_result <- dunnTest(`Energy Provided (kWh)` ~ `Location Name`,
+                           data = ev_top_locations, method = "bonferroni")
+  print(dunn_result)
 }
-```
 
-## Quantile-Quantile Plots Between Variables
+#-----------------------------------------
+# 6. Chi-Square Test of Independence
+#-----------------------------------------
 
-```{r qq-between-vars, fig.height=6}
-# if(ncol(num_data) > 1) {
-#   # Example: Compare first two numerical variables
-#   var1 <- names(num_data)[1]
-#   var2 <- names(num_data)[2]
-#
-#   ggplot(data, aes_string(x = var1, y = var2)) +
-#     geom_qq() +
-#     geom_abline(slope = 1, intercept = 0, color = "red") +
-#     labs(title = paste("Quantile-Quantile Plot:", var1, "vs", var2),
-#          subtitle = "Red line shows y=x reference") +
-#     theme_minimal()
-# }
-```
+cat("\n===== CHI-SQUARE TEST OF INDEPENDENCE =====\n")
+cat("H0: Location and Energy Category are independent\n")
+cat("Ha: Location and Energy Category are dependent\n")
+cat("α =", alpha, "\n\n")
 
-# Box-Cox Transformations
+# Create energy categories for contingency table
+ev_top_locations <- ev_top_locations %>%
+  mutate(
+    Energy_Category = cut(`Energy Provided (kWh)`,
+                          breaks = c(-Inf, 10, 25, 50, Inf),
+                          labels = c("Low (0-10)", "Medium (10-25)",
+                                     "High (25-50)", "Very High (50+)"))
+  )
 
-```{r normality-tests}
-# Test for normality before Box-Cox transformation
-normality_results <- data.frame(
-  Variable = character(),
-  Shapiro_p_value = numeric(),
-  Normal = character(),
-  stringsAsFactors = FALSE
+# Create contingency table
+contingency_table <- table(ev_top_locations$`Location Name`,
+                           ev_top_locations$Energy_Category)
+
+cat("Contingency Table:\n")
+print(contingency_table)
+
+# Visualize contingency table
+contingency_df <- as.data.frame(contingency_table)
+names(contingency_df) <- c("Location", "Energy_Category", "Count")
+
+ggplot(contingency_df, aes(x = Energy_Category, y = Location, fill = Count)) +
+  geom_tile(color = "white") +
+  geom_text(aes(label = Count), size = 4) +
+  scale_fill_gradient(low = "lightyellow", high = "darkred") +
+  labs(title = "Contingency Table: Location vs Energy Category",
+       x = "Energy Category",
+       y = "Location") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Chi-square test
+chi_sq_result <- chisq.test(contingency_table)
+
+cat("\n--- Chi-Square Test Results ---\n")
+cat("Chi-squared statistic:", round(chi_sq_result$statistic, 4), "\n")
+cat("Degrees of freedom:", chi_sq_result$parameter, "\n")
+cat("p-value:", format(chi_sq_result$p.value, scientific = TRUE), "\n")
+cat("Decision:", ifelse(chi_sq_result$p.value < alpha,
+                        "Reject H0 - Location and Energy Category are DEPENDENT",
+                        "Fail to reject H0 - Location and Energy Category are independent"), "\n")
+
+# Expected frequencies (check assumption: all expected counts > 5)
+cat("\nExpected Frequencies:\n")
+print(round(chi_sq_result$expected, 2))
+
+cat("\nAssumption Check: All expected frequencies > 5?\n")
+cat(ifelse(all(chi_sq_result$expected >= 5), "Yes - Assumption met",
+           "No - Consider Fisher's exact test or combine categories"), "\n")
+
+#-----------------------------------------
+# 7. Summary Table
+#-----------------------------------------
+
+summary_tests <- data.frame(
+  Test = c("Kruskal-Wallis", "Chi-Square Independence"),
+  Statistic = c(paste("χ² =", round(kruskal_result$statistic, 3)),
+                paste("χ² =", round(chi_sq_result$statistic, 3))),
+  df = c(kruskal_result$parameter,
+         chi_sq_result$parameter),
+  p_value = c(format(kruskal_result$p.value, scientific = TRUE),
+              format(chi_sq_result$p.value, scientific = TRUE)),
+  Decision = c(ifelse(kruskal_result$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(chi_sq_result$p.value < alpha, "Reject H0", "Fail to reject H0"))
 )
 
-if (ncol(num_data) > 0) {
-  for (var in names(num_data)) {
-    var_data <- num_data[[var]]
-    var_data <- var_data[!is.na(var_data) & var_data > 0] # Box-Cox requires positive values
-
-    if (length(var_data) > 3 && length(var_data) <= 5000) { # Shapiro-Wilk limitations
-      shapiro_test <- shapiro.test(var_data)
-      is_normal <- shapiro_test$p.value > 0.05
-
-      normality_results <- rbind(normality_results, data.frame(
-        Variable = var,
-        Shapiro_p_value = round(shapiro_test$p.value, 6),
-        Normal = ifelse(is_normal, "Yes (p > 0.05)", "No (p ≤ 0.05)")
-      ))
-    }
-  }
-
-  kable(normality_results,
-    caption = "Normality Test Results (Shapiro-Wilk Test)"
-  ) %>%
-    kable_styling(latex_options = c("striped", "hold_position"))
-}
 ```
 
-```{r box-cox-transformations, fig.height=11}
-# Apply Box-Cox transformation to non-normal variables
-if (ncol(num_data) > 0) {
-  non_normal_vars <- normality_results$Variable[normality_results$Normal == "No (p ≤ 0.05)"]
 
-  if (length(non_normal_vars) > 0) {
-    cat("Applying Box-Cox transformations to non-normal variables:\n")
+### Proportion inference
 
-    plots_list <- list()
-    transformation_summary <- data.frame(
-      Variable = character(),
-      Lambda = numeric(),
-      stringsAsFactors = FALSE
-    )
 
-    for (var in non_normal_vars) {
-      var_data <- num_data[[var]]
-      var_data <- var_data[!is.na(var_data) & var_data > 0]
+One-sample proportion CI and test for weekend sessions:
+H0: weekend = 0.25 or some reference value.
+Two-sample proportion test: compare weekend usage between two specific locations.
 
-      if (length(var_data) > 0 && all(var_data > 0)) {
-        # Find optimal lambda
-        bc_result <- boxCox(lm(var_data ~ 1), plotit = FALSE)
-        lambda <- bc_result$x[which.max(bc_result$y)]
 
-        # Apply Box-Cox transformation
-        if (abs(lambda) < 1e-6) {
-          transformed_data <- log(var_data)
-          transform_label <- "Log transformation (λ ≈ 0)"
-        } else {
-          transformed_data <- (var_data^lambda - 1) / lambda
-          transform_label <- paste("Box-Cox transformation (λ =", round(lambda, 3), ")")
-        }
+```{r}
+### Proportion Inference
+### Significance Level: α = 0.05
 
-        # Store transformation info
-        transformation_summary <- rbind(transformation_summary, data.frame(
-          Variable = var,
-          Lambda = round(lambda, 4)
-        ))
+alpha <- 0.05
 
-        # Create before/after plots
-        p1 <- ggplot(data.frame(x = var_data), aes(x = x)) +
-          geom_histogram(bins = 20, fill = "lightcoral", alpha = 0.7) +
-          labs(title = paste("Before:", var), x = var, y = "Frequency") +
-          theme_minimal()
+#-----------------------------------------
+# 1. One-Sample Proportion: Weekend Sessions
+#-----------------------------------------
 
-        p2 <- ggplot(data.frame(x = transformed_data), aes(x = x)) +
-          geom_histogram(bins = 20, fill = "lightgreen", alpha = 0.7) +
-          labs(
-            title = paste("After:", transform_label),
-            x = paste("Transformed", var), y = "Frequency"
-          ) +
-          theme_minimal()
+cat("===== ONE-SAMPLE PROPORTION TEST: Weekend Sessions =====\n")
+cat("H0: p_weekend = 0.25 (25% of sessions are on weekends)\n")
+cat("Ha: p_weekend ≠ 0.25\n")
+cat("α =", alpha, "\n\n")
 
-        # Q-Q plots
-        p3 <- ggplot(data.frame(x = var_data), aes(sample = x)) +
-          stat_qq() +
-          stat_qq_line(color = "red") +
-          labs(title = paste("Q-Q Before:", var)) +
-          theme_minimal()
+# Calculate observed proportion
+n_total <- nrow(ev_data)
+n_weekend <- sum(ev_data$is_weekend == TRUE)
+p_observed <- n_weekend / n_total
 
-        p4 <- ggplot(data.frame(x = transformed_data), aes(sample = x)) +
-          stat_qq() +
-          stat_qq_line(color = "red") +
-          labs(title = paste("Q-Q After:", transform_label)) +
-          theme_minimal()
+cat("--- Sample Statistics ---\n")
+cat("Total sessions:", n_total, "\n")
+cat("Weekend sessions:", n_weekend, "\n")
+cat("Observed proportion (p̂):", round(p_observed, 4), "\n")
+cat("Expected proportion (p0): 0.25\n\n")
 
-        # Combine plots
-        combined_plot <- grid.arrange(p1, p2, p3, p4,
-          ncol = 2,
-          top = paste("Box-Cox Transformation for", var)
-        )
-        plots_list[[length(plots_list) + 1]] <- combined_plot
-      }
-    }
+# One-sample proportion test
+p0 <- 0.25  # Hypothesized proportion
+prop_test_one <- prop.test(n_weekend, n_total, p = p0, 
+                            conf.level = 1 - alpha, 
+                            correct = FALSE)  # Without Yates continuity correction
 
-    # Display transformation summary
-    if (nrow(transformation_summary) > 0) {
-      kable(transformation_summary,
-        caption = "Box-Cox Transformation Parameters"
-      ) %>%
-        kable_styling(latex_options = c("striped", "hold_position"))
-    }
-  } else {
-    cat("All variables appear to be normally distributed. No Box-Cox transformation needed.\n")
-  }
-} else {
-  cat("No numerical variables available for Box-Cox transformation.\n")
-}
+cat("--- One-Sample z-Test for Proportion ---\n")
+cat("Chi-squared statistic:", round(prop_test_one$statistic, 4), "\n")
+cat("p-value:", format(prop_test_one$p.value, scientific = TRUE), "\n")
+cat("95% Confidence Interval for p_weekend:", 
+    round(prop_test_one$conf.int[1], 4), "to", round(prop_test_one$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(prop_test_one$p.value < alpha, 
+                        "Reject H0 - Weekend proportion differs from 0.25", 
+                        "Fail to reject H0 - No evidence weekend proportion differs from 0.25"), "\n")
+
+# Manual z-test calculation for clarity
+z_stat <- (p_observed - p0) / sqrt(p0 * (1 - p0) / n_total)
+p_value_z <- 2 * pnorm(-abs(z_stat))  # Two-tailed
+
+cat("\n--- Manual z-Test Calculation ---\n")
+cat("z-statistic:", round(z_stat, 4), "\n")
+cat("p-value (two-tailed):", format(p_value_z, scientific = TRUE), "\n")
+
+# Wilson confidence interval (more accurate for proportions)
+cat("\n--- Wilson 95% Confidence Interval ---\n")
+wilson_ci <- prop.test(n_weekend, n_total, conf.level = 1 - alpha, correct = FALSE)$conf.int
+cat("95% CI:", round(wilson_ci[1], 4), "to", round(wilson_ci[2], 4), "\n")
+
+#-----------------------------------------
+# 2. Two-Sample Proportion: Weekend Usage by Location
+#-----------------------------------------
+
+cat("\n\n===== TWO-SAMPLE PROPORTION TEST: Weekend Usage by Location =====\n")
+
+# Select two locations for comparison (top 2 by frequency)
+top_2_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(2) %>%
+  pull(`Location Name`)
+
+cat("Comparing locations:\n")
+cat("  Location 1:", top_2_locations[1], "\n")
+cat("  Location 2:", top_2_locations[2], "\n\n")
+
+# Filter data for these two locations
+loc1_data <- ev_data %>% filter(`Location Name` == top_2_locations[1])
+loc2_data <- ev_data %>% filter(`Location Name` == top_2_locations[2])
+
+# Calculate proportions
+n1 <- nrow(loc1_data)
+n2 <- nrow(loc2_data)
+x1 <- sum(loc1_data$is_weekend == TRUE)
+x2 <- sum(loc2_data$is_weekend == TRUE)
+p1 <- x1 / n1
+p2 <- x2 / n2
+
+cat("--- Sample Statistics ---\n")
+cat("Location 1 -", top_2_locations[1], ":\n")
+cat("  Total sessions:", n1, "\n")
+cat("  Weekend sessions:", x1, "\n")
+cat("  Proportion weekend (p̂1):", round(p1, 4), "\n\n")
+
+cat("Location 2 -", top_2_locations[2], ":\n")
+cat("  Total sessions:", n2, "\n")
+cat("  Weekend sessions:", x2, "\n")
+cat("  Proportion weekend (p̂2):", round(p2, 4), "\n\n")
+
+cat("Difference (p̂1 - p̂2):", round(p1 - p2, 4), "\n\n")
+
+# Hypothesis test
+cat("H0: p1 = p2 (Weekend proportion is equal at both locations)\n")
+cat("Ha: p1 ≠ p2 (Weekend proportions differ)\n")
+cat("α =", alpha, "\n\n")
+
+# Two-sample proportion test
+prop_test_two <- prop.test(c(x1, x2), c(n1, n2),
+                            conf.level = 1 - alpha,
+                            correct = FALSE)
+
+cat("--- Two-Sample z-Test for Proportions ---\n")
+cat("Chi-squared statistic:", round(prop_test_two$statistic, 4), "\n")
+cat("p-value:", format(prop_test_two$p.value, scientific = TRUE), "\n")
+cat("95% CI for difference (p1 - p2):",
+    round(prop_test_two$conf.int[1], 4), "to", round(prop_test_two$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(prop_test_two$p.value < alpha,
+                        "Reject H0 - Weekend proportions differ between locations",
+                        "Fail to reject H0 - No significant difference in weekend proportions"), "\n")
+
+# Manual z-test calculation
+p_pooled <- (x1 + x2) / (n1 + n2)
+se_pooled <- sqrt(p_pooled * (1 - p_pooled) * (1/n1 + 1/n2))
+z_stat_two <- (p1 - p2) / se_pooled
+p_value_z_two <- 2 * pnorm(-abs(z_stat_two))
+
+cat("\n--- Manual z-Test Calculation ---\n")
+cat("Pooled proportion:", round(p_pooled, 4), "\n")
+cat("Standard error:", round(se_pooled, 4), "\n")
+cat("z-statistic:", round(z_stat_two, 4), "\n")
+cat("p-value (two-tailed):", format(p_value_z_two, scientific = TRUE), "\n")
+
+#-----------------------------------------
+# 3. Visualization
+#-----------------------------------------
+
+# Bar plot comparing weekend proportions by location
+prop_comparison <- data.frame(
+  Location = c(top_2_locations[1], top_2_locations[2]),
+  Weekend_Proportion = c(p1, p2),
+  Weekend_Count = c(x1, x2),
+  Total_Count = c(n1, n2)
+)
+
+ggplot(prop_comparison, aes(x = Location, y = Weekend_Proportion, fill = Location)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  geom_text(aes(label = paste0(round(Weekend_Proportion * 100, 1), "%\n(",
+                                Weekend_Count, "/", Total_Count, ")")),
+            vjust = -0.3, size = 4) +
+  geom_hline(yintercept = 0.25, linetype = "dashed", color = "red", linewidth = 1) +
+  annotate("text", x = 1.5, y = 0.32, label = "Reference: 25%", color = "red") +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 0.5),
+                     expand = expansion(mult = c(0, 0.15))) +
+  labs(title = "Weekend Session Proportion by Location",
+       subtitle = paste("Two-sample test p-value:", format(prop_test_two$p.value, scientific = TRUE)),
+       x = "Location",
+       y = "Proportion of Weekend Sessions") +
+  theme_minimal() +
+  theme(legend.position = "none",
+        axis.text.x = element_text(angle = 15, hjust = 1)) +
+  scale_fill_brewer(palette = "Set2")
+
+# #-----------------------------------------
+# # 4. Summary Table
+# #-----------------------------------------
+# 
+# summary_proportion <- data.frame(
+#   Test = c("One-Sample (Weekend = 0.30)", 
+#            paste("Two-Sample (", substr(top_2_locations[1], 1, 15), " vs ", 
+#                  substr(top_2_locations[2], 1, 15), ")", sep = "")),
+#   Observed = c(paste0(round(p_observed * 100, 2), "%"),
+#                paste0(round(p1 * 100, 2), "% vs ", round(p2 * 100, 2), "%")),
+#   Test_Statistic = c(paste("χ² =", round(prop_test_one$statistic, 3)),
+#                      paste("χ² =", round(prop_test_two$statistic, 3))),
+#   p_value = c(format(prop_test_one$p.value, scientific = TRUE),
+#               format(prop_test_two$p.value, scientific = TRUE)),
+#   CI_95 = c(paste0("(", round(prop_test_one$conf.int[1], 4), ", ", 
+#                    round(prop_test_one$conf.int[2], 4), ")"),
+#             paste0("(", round(prop_test_two$conf.int[1], 4), ", ", 
+#                    round(prop_test_two$conf.int[2], 4), ")")),
+#   Decision = c(ifelse(prop_test_one$p.value < alpha, "Reject H0", "Fail to reject H0"),
+#                ifelse(prop_test_two$p.value < alpha, "Reject H0", "Fail to reject H0"))
+# )
+
 ```
 
-# Summary and Conclusions
+### Variance/spread comparisons
 
-```{r final-summary}
-cat("## Analysis Summary\n\n")
-cat("Dataset:", deparse(substitute(data)), "\n")
-cat("Total observations:", nrow(data), "\n")
-cat("Total variables:", ncol(data), "\n")
-cat("Numerical variables:", sum(sapply(data, is.numeric)), "\n")
-cat("Categorical variables:", sum(sapply(data, is.factor)), "\n")
+F-test for variance in Energy Provided (kWh) between two groups:
 
-if (exists("normality_results") && nrow(normality_results) > 0) {
-  normal_count <- sum(grepl("Yes", normality_results$Normal))
-  cat("Variables following normal distribution:", normal_count, "out of", nrow(normality_results), "\n")
+
+PAID vs ROAMING (Session Status) or weekend vs weekday.
+
+```{r}
+### Variance/Spread Comparisons (F-Test)
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. F-Test: PAID vs ROAMING (Session Status)
+#-----------------------------------------
+
+cat("===== F-TEST FOR VARIANCE: PAID vs ROAMING =====\n")
+cat("H0: σ²_PAID = σ²_ROAMING (Variances are equal)\n")
+cat("Ha: σ²_PAID ≠ σ²_ROAMING (Variances are not equal)\n")
+cat("α =", alpha, "\n\n")
+
+# Filter data for PAID and ROAMING sessions
+paid_data <- ev_data %>% filter(`Session Status` == "PAID")
+roaming_data <- ev_data %>% filter(`Session Status` == "ROAMING")
+
+# Sample statistics
+n_paid <- nrow(paid_data)
+n_roaming <- nrow(roaming_data)
+var_paid <- var(paid_data$`Energy Provided (kWh)`, na.rm = TRUE)
+var_roaming <- var(roaming_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_paid <- sd(paid_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_roaming <- sd(roaming_data$`Energy Provided (kWh)`, na.rm = TRUE)
+
+cat("--- Sample Statistics ---\n")
+cat("PAID Sessions:\n")
+cat("  n =", n_paid, "\n")
+cat("  Variance (s²) =", round(var_paid, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_paid, 4), "kWh\n\n")
+
+cat("ROAMING Sessions:\n")
+cat("  n =", n_roaming, "\n")
+cat("  Variance (s²) =", round(var_roaming, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_roaming, 4), "kWh\n\n")
+
+cat("Variance Ratio (s²_PAID / s²_ROAMING):", round(var_paid / var_roaming, 4), "\n\n")
+
+# F-test
+f_test_status <- var.test(paid_data$`Energy Provided (kWh)`, 
+                           roaming_data$`Energy Provided (kWh)`, 
+                           conf.level = 1 - alpha)
+
+cat("--- F-Test Results ---\n")
+cat("F-statistic:", round(f_test_status$statistic, 4), "\n")
+cat("Degrees of freedom: df1 =", f_test_status$parameter[1], 
+    ", df2 =", f_test_status$parameter[2], "\n")
+cat("p-value:", format(f_test_status$p.value, scientific = TRUE), "\n")
+cat("95% CI for variance ratio:", round(f_test_status$conf.int[1], 4), 
+    "to", round(f_test_status$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(f_test_status$p.value < alpha, 
+                        "Reject H0 - Variances are significantly different", 
+                        "Fail to reject H0 - No significant difference in variances"), "\n")
+
+#-----------------------------------------
+# 2. F-Test: Weekend vs Weekday
+#-----------------------------------------
+
+cat("\n\n===== F-TEST FOR VARIANCE: Weekend vs Weekday =====\n")
+cat("H0: σ²_weekend = σ²_weekday (Variances are equal)\n")
+cat("Ha: σ²_weekend ≠ σ²_weekday (Variances are not equal)\n")
+cat("α =", alpha, "\n\n")
+
+# Filter data
+weekday_data <- ev_data %>% filter(is_weekend == FALSE)
+weekend_data <- ev_data %>% filter(is_weekend == TRUE)
+
+# Sample statistics
+n_weekday <- nrow(weekday_data)
+n_weekend <- nrow(weekend_data)
+var_weekday <- var(weekday_data$`Energy Provided (kWh)`, na.rm = TRUE)
+var_weekend <- var(weekend_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_weekday <- sd(weekday_data$`Energy Provided (kWh)`, na.rm = TRUE)
+sd_weekend <- sd(weekend_data$`Energy Provided (kWh)`, na.rm = TRUE)
+
+cat("--- Sample Statistics ---\n")
+cat("Weekday Sessions:\n")
+cat("  n =", n_weekday, "\n")
+cat("  Variance (s²) =", round(var_weekday, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_weekday, 4), "kWh\n\n")
+
+cat("Weekend Sessions:\n")
+cat("  n =", n_weekend, "\n")
+cat("  Variance (s²) =", round(var_weekend, 4), "kWh²\n")
+cat("  Std Dev (s) =", round(sd_weekend, 4), "kWh\n\n")
+
+cat("Variance Ratio (s²_weekday / s²_weekend):", round(var_weekday / var_weekend, 4), "\n\n")
+
+# F-test
+f_test_weekend <- var.test(weekday_data$`Energy Provided (kWh)`, 
+                            weekend_data$`Energy Provided (kWh)`, 
+                            conf.level = 1 - alpha)
+
+cat("--- F-Test Results ---\n")
+cat("F-statistic:", round(f_test_weekend$statistic, 4), "\n")
+cat("Degrees of freedom: df1 =", f_test_weekend$parameter[1], 
+    ", df2 =", f_test_weekend$parameter[2], "\n")
+cat("p-value:", format(f_test_weekend$p.value, scientific = TRUE), "\n")
+cat("95% CI for variance ratio:", round(f_test_weekend$conf.int[1], 4), 
+    "to", round(f_test_weekend$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(f_test_weekend$p.value < alpha, 
+                        "Reject H0 - Variances are significantly different", 
+                        "Fail to reject H0 - No significant difference in variances"), "\n")
+
+
+
+ev_paid_roaming <- ev_data %>% filter(`Session Status` %in% c("PAID", "ROAMING"))
+
+#-----------------------------------------
+# 4. Visualization
+#-----------------------------------------
+
+# Boxplot: Energy by Session Status (PAID vs ROAMING)
+p1 <- ggplot(ev_paid_roaming, aes(x = `Session Status`, y = `Energy Provided (kWh)`, 
+                                   fill = `Session Status`)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  stat_summary(fun = var, geom = "text", aes(label = paste("s² =", round(..y.., 1))),
+               vjust = -0.5, size = 3.5) +
+  labs(title = "Energy Provided: PAID vs ROAMING",
+       subtitle = paste("F-test p-value:", format(f_test_status$p.value, scientific = TRUE)),
+       x = "Session Status",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_brewer(palette = "Set1")
+
+# Boxplot: Energy by Weekend
+p2 <- ggplot(ev_data, aes(x = ifelse(is_weekend, "Weekend", "Weekday"), 
+                           y = `Energy Provided (kWh)`, 
+                           fill = is_weekend)) +
+  geom_boxplot(outlier.alpha = 0.3) +
+  labs(title = "Energy Provided: Weekend vs Weekday",
+       subtitle = paste("F-test p-value:", format(f_test_weekend$p.value, scientific = TRUE)),
+       x = "Day Type",
+       y = "Energy Provided (kWh)") +
+  theme_minimal() +
+  theme(legend.position = "none") +
+  scale_fill_manual(values = c("steelblue", "coral"))
+
+# Display plots side by side
+grid.arrange(p1, p2, ncol = 2)
+
+#-----------------------------------------
+# 5. Summary Table
+#-----------------------------------------
+
+summary_variance <- data.frame(
+  Comparison = c("PAID vs ROAMING", "Weekend vs Weekday"),
+  Group1_Variance = c(round(var_paid, 2), round(var_weekday, 2)),
+  Group2_Variance = c(round(var_roaming, 2), round(var_weekend, 2)),
+  F_statistic = c(round(f_test_status$statistic, 4), round(f_test_weekend$statistic, 4)),
+  df = c(paste(f_test_status$parameter[1], ",", f_test_status$parameter[2]),
+         paste(f_test_weekend$parameter[1], ",", f_test_weekend$parameter[2])),
+  p_value = c(format(f_test_status$p.value, scientific = TRUE),
+              format(f_test_weekend$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(f_test_status$conf.int[1], 3), ", ", 
+                   round(f_test_status$conf.int[2], 3), ")"),
+            paste0("(", round(f_test_weekend$conf.int[1], 3), ", ", 
+                   round(f_test_weekend$conf.int[2], 3), ")")),
+  Decision = c(ifelse(f_test_status$p.value < alpha, "Reject H0", "Fail to reject H0"),
+               ifelse(f_test_weekend$p.value < alpha, "Reject H0", "Fail to reject H0"))
+)
+
+kable(summary_variance,
+      caption = paste("F-Test for Variance Comparison (α =", alpha, ")"),
+      col.names = c("Comparison", "Variance (Group 1)", "Variance (Group 2)", 
+                    "F-statistic", "df", "p-value", "95% CI", "Decision"),
+      align = "lrrrrrrl") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
+
+###Correlation and regression (uses num_data)
+Correlation test between Charge Duration and Energy Provided.
+Simple linear regression:
+- Energy Provided ~ Charge Duration.
+- Multiple regression adding is_weekend and a few major Location Names.
+
+
+
+```{r}
+### Pearson Correlation Assumption Checks
+
+#-----------------------------------------
+# 2. Check: Linearity (Scatterplot)
+#-----------------------------------------
+cat("===== ASSUMPTION 2: Linearity =====\n")
+cat("Visual inspection via scatterplot\n\n")
+
+ggplot(ev_data, aes(x = `Charge Duration (min)`, y = `Energy Provided (kWh)`)) +
+  geom_point(alpha = 0.2, color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red", linewidth = 1) +
+  geom_smooth(method = "loess", se = TRUE, color = "green", linewidth = 1, linetype = "dashed") +
+  labs(title = "Linearity Check: Charge Duration vs Energy Provided",
+       subtitle = "Red = Linear fit, Green = LOESS (non-linear) fit\nIf both lines are similar, linearity holds",
+       x = "Charge Duration (min)",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+
+#-----------------------------------------
+# 5. Check: Outliers
+#-----------------------------------------
+cat("\n===== ASSUMPTION 5: Outliers =====\n")
+
+# Boxplots for outlier detection
+p3 <- ggplot(ev_data, aes(y = `Charge Duration (min)`)) +
+  geom_boxplot(fill = "steelblue", alpha = 0.7, outlier.color = "red", outlier.alpha = 0.5) +
+  labs(title = "Outliers: Charge Duration",
+       y = "Charge Duration (min)") +
+  theme_minimal()
+
+p4 <- ggplot(ev_data, aes(y = `Energy Provided (kWh)`)) +
+  geom_boxplot(fill = "coral", alpha = 0.7, outlier.color = "red", outlier.alpha = 0.5) +
+  labs(title = "Outliers: Energy Provided",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+grid.arrange(p3, p4, ncol = 2, top = "Outlier Detection")
+
+# Count outliers using IQR method
+count_outliers <- function(x) {
+  Q1 <- quantile(x, 0.25, na.rm = TRUE)
+  Q3 <- quantile(x, 0.75, na.rm = TRUE)
+  IQR <- Q3 - Q1
+  lower <- Q1 - 1.5 * IQR
+  upper <- Q3 + 1.5 * IQR
+  sum(x < lower | x > upper, na.rm = TRUE)
 }
 
-cat("\n## Key Findings:\n")
-cat("- Replace this section with your specific findings\n")
-cat("- Describe patterns observed in the data\n")
-cat("- Mention any outliers or unusual observations\n")
-cat("- Discuss correlations between variables\n")
-cat("- Summarize transformation results if applicable\n")
+cat("Outliers (IQR method):\n")
+cat("Charge Duration:", count_outliers(ev_data$`Charge Duration (min)`), 
+    "out of", nrow(ev_data), 
+    paste0("(", round(count_outliers(ev_data$`Charge Duration (min)`) / nrow(ev_data) * 100, 2), "%)"), "\n")
+cat("Energy Provided:", count_outliers(ev_data$`Energy Provided (kWh)`), 
+    "out of", nrow(ev_data), 
+    paste0("(", round(count_outliers(ev_data$`Energy Provided (kWh)`) / nrow(ev_data) * 100, 2), "%)"), "\n")
+
 ```
+
+
+
+
+```{r}
+### Correlation and Regression Analysis
+### Significance Level: α = 0.05
+
+alpha <- 0.05
+
+#-----------------------------------------
+# 1. Correlation Test: Charge Duration vs Energy Provided
+#-----------------------------------------
+
+cat("===== CORRELATION TEST =====\n")
+cat("H0: ρ = 0 (No linear correlation)\n")
+cat("Ha: ρ ≠ 0 (Linear correlation exists)\n")
+cat("α =", alpha, "\n\n")
+
+# Pearson correlation test
+cor_test <- cor.test(ev_data$`Charge Duration (min)`, 
+                      ev_data$`Energy Provided (kWh)`, 
+                      method = "pearson",
+                      conf.level = 1 - alpha)
+
+cat("--- Pearson Correlation Test ---\n")
+cat("Correlation coefficient (r):", round(cor_test$estimate, 4), "\n")
+cat("t-statistic:", round(cor_test$statistic, 4), "\n")
+cat("Degrees of freedom:", cor_test$parameter, "\n")
+cat("p-value:", format(cor_test$p.value, scientific = TRUE), "\n")
+cat("95% CI for r:", round(cor_test$conf.int[1], 4), "to", round(cor_test$conf.int[2], 4), "\n")
+cat("Decision:", ifelse(cor_test$p.value < alpha, 
+                        "Reject H0 - Significant correlation exists", 
+                        "Fail to reject H0 - No significant correlation"), "\n")
+
+# Interpretation of correlation strength
+r_value <- abs(cor_test$estimate)
+strength <- case_when(
+  r_value < 0.3 ~ "Weak",
+  r_value < 0.7 ~ "Moderate",
+  TRUE ~ "Strong"
+)
+cat("Correlation strength:", strength, "\n")
+
+# Coefficient of determination
+r_squared <- cor_test$estimate^2
+cat("R² (coefficient of determination):", round(r_squared, 4), 
+    paste0("(", round(r_squared * 100, 2), "% of variance explained)\n"))
+
+# Spearman correlation (non-parametric alternative)
+cor_test_spearman <- cor.test(ev_data$`Charge Duration (min)`, 
+                               ev_data$`Energy Provided (kWh)`, 
+                               method = "spearman")
+
+cat("\n--- Spearman Correlation (Non-parametric) ---\n")
+cat("Correlation coefficient (ρ):", round(cor_test_spearman$estimate, 4), "\n")
+cat("p-value:", format(cor_test_spearman$p.value, scientific = TRUE), "\n")
+
+# Scatterplot with correlation
+ggplot(ev_data, aes(x = `Charge Duration (min)`, y = `Energy Provided (kWh)`)) +
+  geom_point(alpha = 0.3, color = "steelblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "darkred", linewidth = 1) +
+  annotate("text", 
+           x = max(ev_data$`Charge Duration (min)`, na.rm = TRUE) * 0.75,
+           y = max(ev_data$`Energy Provided (kWh)`, na.rm = TRUE) * 0.95,
+           label = paste0("r = ", round(cor_test$estimate, 3), 
+                          "\np < 0.001"),
+           size = 5, fontface = "bold", color = "darkred") +
+  labs(title = "Correlation: Charge Duration vs Energy Provided",
+       subtitle = paste("95% CI for r: [", round(cor_test$conf.int[1], 3), ", ", 
+                        round(cor_test$conf.int[2], 3), "]", sep = ""),
+       x = "Charge Duration (min)",
+       y = "Energy Provided (kWh)") +
+  theme_minimal()
+
+#-----------------------------------------
+# 2. Simple Linear Regression
+#-----------------------------------------
+
+cat("\n\n===== SIMPLE LINEAR REGRESSION =====\n")
+cat("Model: Energy Provided = β0 + β1(Charge Duration) + ε\n\n")
+
+# Fit simple linear regression
+simple_model <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)`, data = ev_data)
+simple_summary <- summary(simple_model)
+
+cat("--- Model Summary ---\n")
+print(simple_summary)
+
+# Extract key statistics
+cat("\n--- Key Statistics ---\n")
+cat("Intercept (β0):", round(coef(simple_model)[1], 4), "\n")
+cat("Slope (β1):", round(coef(simple_model)[2], 4), "\n")
+cat("R²:", round(simple_summary$r.squared, 4), "\n")
+cat("Adjusted R²:", round(simple_summary$adj.r.squared, 4), "\n")
+cat("Residual Std Error:", round(simple_summary$sigma, 4), "\n")
+cat("F-statistic:", round(simple_summary$fstatistic[1], 4), "\n")
+
+# Confidence intervals for coefficients
+cat("\n--- 95% Confidence Intervals for Coefficients ---\n")
+print(confint(simple_model, level = 1 - alpha))
+
+# Interpretation
+cat("\n--- Interpretation ---\n")
+cat("For every 1 minute increase in Charge Duration,\n")
+cat("Energy Provided increases by", round(coef(simple_model)[2], 4), "kWh on average.\n")
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(simple_model)
+par(mfrow = c(1, 1))
+
+#-----------------------------------------
+# 3. Multiple Linear Regression
+#-----------------------------------------
+
+cat("\n\n===== MULTIPLE LINEAR REGRESSION =====\n")
+cat("Model: Energy Provided = β0 + β1(Charge Duration) + β2(is_weekend) + β3(Location) + ε\n\n")
+
+# Prepare data: select top 4 locations for cleaner model
+top_4_locations <- ev_data %>%
+  count(`Location Name`, sort = TRUE) %>%
+  head(4) %>%
+  pull(`Location Name`)
+
+ev_regression <- ev_data %>%
+  filter(`Location Name` %in% top_4_locations) %>%
+  mutate(
+    Location = factor(`Location Name`),
+    is_weekend = as.factor(is_weekend)
+  )
+
+cat("Locations included in model:\n")
+print(top_4_locations)
+cat("\nSample size:", nrow(ev_regression), "\n\n")
+
+# Fit multiple regression
+multiple_model <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)` + is_weekend + Location, 
+                      data = ev_regression)
+multiple_summary <- summary(multiple_model)
+
+cat("--- Model Summary ---\n")
+print(multiple_summary)
+
+# Extract key statistics
+cat("\n--- Key Statistics ---\n")
+cat("R²:", round(multiple_summary$r.squared, 4), "\n")
+cat("Adjusted R²:", round(multiple_summary$adj.r.squared, 4), "\n")
+cat("Residual Std Error:", round(multiple_summary$sigma, 4), "\n")
+cat("F-statistic:", round(multiple_summary$fstatistic[1], 4), 
+    "on", multiple_summary$fstatistic[2], "and", multiple_summary$fstatistic[3], "df\n")
+cat("p-value:", format(pf(multiple_summary$fstatistic[1], 
+                          multiple_summary$fstatistic[2], 
+                          multiple_summary$fstatistic[3], 
+                          lower.tail = FALSE), scientific = TRUE), "\n")
+
+# Confidence intervals for coefficients
+cat("\n--- 95% Confidence Intervals for Coefficients ---\n")
+print(confint(multiple_model, level = 1 - alpha))
+
+# ANOVA table for multiple regression
+cat("\n--- ANOVA Table ---\n")
+print(anova(multiple_model))
+
+# Diagnostic plots
+par(mfrow = c(2, 2))
+plot(multiple_model)
+par(mfrow = c(1, 1))
+
+#-----------------------------------------
+# 4. Model Comparison
+#-----------------------------------------
+
+cat("\n\n===== MODEL COMPARISON =====\n")
+
+# Compare R² values
+cat("--- R² Comparison ---\n")
+cat("Simple Model R²:", round(simple_summary$r.squared, 4), "\n")
+cat("Multiple Model R²:", round(multiple_summary$r.squared, 4), "\n")
+cat("Improvement:", round((multiple_summary$r.squared - simple_summary$r.squared) * 100, 2), 
+    "percentage points\n")
+
+# Compare adjusted R²
+cat("\n--- Adjusted R² Comparison ---\n")
+cat("Simple Model Adj R²:", round(simple_summary$adj.r.squared, 4), "\n")
+cat("Multiple Model Adj R²:", round(multiple_summary$adj.r.squared, 4), "\n")
+
+# AIC and BIC comparison (need to fit on same data)
+simple_model_subset <- lm(`Energy Provided (kWh)` ~ `Charge Duration (min)`, data = ev_regression)
+
+cat("\n--- AIC/BIC Comparison ---\n")
+cat("Simple Model - AIC:", round(AIC(simple_model_subset), 2), 
+    ", BIC:", round(BIC(simple_model_subset), 2), "\n")
+cat("Multiple Model - AIC:", round(AIC(multiple_model), 2), 
+    ", BIC:", round(BIC(multiple_model), 2), "\n")
+cat("Lower values indicate better fit\n")
+
+#-----------------------------------------
+# 5. Coefficient Visualization
+#-----------------------------------------
+
+# Extract coefficients for visualization
+coef_df <- data.frame(
+  Term = names(coef(multiple_model)),
+  Estimate = coef(multiple_model),
+  CI_lower = confint(multiple_model)[, 1],
+  CI_upper = confint(multiple_model)[, 2]
+) %>%
+  filter(Term != "(Intercept)")  # Remove intercept for cleaner plot
+
+# Coefficient plot
+ggplot(coef_df, aes(x = reorder(Term, Estimate), y = Estimate)) +
+  geom_point(size = 3, color = "steelblue") +
+  geom_errorbar(aes(ymin = CI_lower, ymax = CI_upper), width = 0.2, color = "steelblue") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red") +
+  coord_flip() +
+  labs(title = "Multiple Regression Coefficients",
+       subtitle = "With 95% Confidence Intervals",
+       x = "Predictor",
+       y = "Coefficient Estimate") +
+  theme_minimal()
+
+#-----------------------------------------
+# 6. Summary Tables
+#-----------------------------------------
+
+# Correlation summary
+correlation_summary <- data.frame(
+  Method = c("Pearson", "Spearman"),
+  Coefficient = c(round(cor_test$estimate, 4), round(cor_test_spearman$estimate, 4)),
+  p_value = c(format(cor_test$p.value, scientific = TRUE), 
+              format(cor_test_spearman$p.value, scientific = TRUE)),
+  CI_95 = c(paste0("(", round(cor_test$conf.int[1], 4), ", ", 
+                   round(cor_test$conf.int[2], 4), ")"), "N/A"),
+  Decision = c(ifelse(cor_test$p.value < alpha, "Significant", "Not Significant"),
+               ifelse(cor_test_spearman$p.value < alpha, "Significant", "Not Significant"))
+)
+
+kable(correlation_summary,
+      caption = paste("Correlation Test Summary (α =", alpha, ")"),
+      col.names = c("Method", "Coefficient", "p-value", "95% CI", "Decision"),
+      align = "lrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+# Regression model comparison
+model_comparison <- data.frame(
+  Model = c("Simple (Duration only)", "Multiple (Duration + Weekend + Location)"),
+  R_squared = c(round(simple_summary$r.squared, 4), round(multiple_summary$r.squared, 4)),
+  Adj_R_squared = c(round(simple_summary$adj.r.squared, 4), round(multiple_summary$adj.r.squared, 4)),
+  RSE = c(round(simple_summary$sigma, 4), round(multiple_summary$sigma, 4)),
+  AIC = c(round(AIC(simple_model_subset), 2), round(AIC(multiple_model), 2)),
+  BIC = c(round(BIC(simple_model_subset), 2), round(BIC(multiple_model), 2))
+)
+
+kable(model_comparison,
+      caption = "Regression Model Comparison",
+      col.names = c("Model", "R²", "Adj R²", "Residual SE", "AIC", "BIC"),
+      align = "lrrrrr") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+
+# Multiple regression coefficients table
+coef_table <- data.frame(
+  Term = rownames(summary(multiple_model)$coefficients),
+  Estimate = round(summary(multiple_model)$coefficients[, 1], 4),
+  Std_Error = round(summary(multiple_model)$coefficients[, 2], 4),
+  t_value = round(summary(multiple_model)$coefficients[, 3], 4),
+  p_value = format(summary(multiple_model)$coefficients[, 4], scientific = TRUE),
+  Significant = ifelse(summary(multiple_model)$coefficients[, 4] < alpha, "Yes", "No")
+)
+
+kable(coef_table,
+      caption = paste("Multiple Regression Coefficients (α =", alpha, ")"),
+      col.names = c("Term", "Estimate", "Std Error", "t-value", "p-value", "Significant?"),
+      align = "lrrrrr",
+      row.names = FALSE) %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"),
+                full_width = FALSE,
+                position = "center")
+```
+
