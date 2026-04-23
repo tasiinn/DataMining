@@ -278,7 +278,7 @@ EV-Charging-Analysis/
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/your-username/your-repo-name.git
+git clone https://github.com/zubaerchowdhury/NYC-EV-Charging-Analysis.git
 cd your-repo-name
 ```
 
@@ -330,11 +330,11 @@ To make this repository stronger as a portfolio project, consider adding:
 ---
 
 <!-- MARKDOWN LINKS & IMAGES -->
-[contributors-shield]: https://img.shields.io/github/contributors/your-username/your-repo-name.svg?style=for-the-badge
-[contributors-url]: https://github.com/your-username/your-repo-name/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/your-username/your-repo-name.svg?style=for-the-badge
-[forks-url]: https://github.com/your-username/your-repo-name/network/members
-[issues-shield]: https://img.shields.io/github/issues/your-username/your-repo-name.svg?style=for-the-badge
-[issues-url]: https://github.com/your-username/your-repo-name/issues
-[license-shield]: https://img.shields.io/github/license/your-username/your-repo-name.svg?style=for-the-badge
-[license-url]: https://github.com/your-username/your-repo-name/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/zubaerchowdhury/NYC-EV-Charging-Analysis.svg?style=for-the-badge
+[contributors-url]: https://github.com/zubaerchowdhury/NYC-EV-Charging-Analysis/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/zubaerchowdhury/NYC-EV-Charging-Analysis.svg?style=for-the-badge
+[forks-url]: https://github.com/zubaerchowdhury/NYC-EV-Charging-Analysis/network/members
+[issues-shield]: https://img.shields.io/github/issues/zubaerchowdhury/NYC-EV-Charging-Analysis.svg?style=for-the-badge
+[issues-url]: https://github.com/zubaerchowdhury/NYC-EV-Charging-Analysis/issues
+[license-shield]: https://img.shields.io/github/license/zubaerchowdhury/NYC-EV-Charging-Analysis.svg?style=for-the-badge
+[license-url]: https://github.com/zubaerchowdhury/NYC-EV-Charging-Analysis/blob/main/LICENSE
